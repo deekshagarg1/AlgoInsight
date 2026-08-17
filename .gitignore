@@ -1,0 +1,17 @@
+# Logs
+client/logs
+client/*.log
+client/npm-debug.log*
+
+# Dependencies
+client/node_modules
+
+# Production
+client/dist
+client/dist-ssr
+client/*.local
+
+# Editors
+.vscode/
+.idea/
+.DS_Store
