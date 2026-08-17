@@ -74,16 +74,18 @@ function App() {
       </main>
 
       {/* Footer (Premium Glassmorphic Footer) */}
-      <footer className="border-t border-slate-900/60 bg-slate-950/90 py-7 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-center gap-2.5 font-sans relative">
-        {/* Glow Divider line */}
-        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/25 to-transparent"></div>
-        
-        <span>© {new Date().getFullYear()} AlgoInsight. Designed for MCA 3rd Semester Project.</span>
-        <span className="hidden sm:inline text-slate-800">|</span>
-        <span className="flex items-center gap-1">
-          Made with <span className="text-rose-500 animate-pulse">❤️</span> by <span className="text-slate-350 font-semibold hover:text-cyan-400 transition-colors">Pulkit Mishra</span> and <span className="text-slate-350 font-semibold hover:text-cyan-400 transition-colors">Deeksha Garg</span>
-        </span>
-      </footer>
+      {activeTab !== 'home' && activeTab !== 'visualizer' && (
+        <footer className="border-t border-slate-900/60 bg-slate-950/90 py-7 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-center gap-2.5 font-sans relative shrink-0">
+          {/* Glow Divider line */}
+          <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/25 to-transparent"></div>
+          
+          <span>© {new Date().getFullYear()} AlgoInsight. Designed for MCA 3rd Semester Project.</span>
+          <span className="hidden sm:inline text-slate-800">|</span>
+          <span className="flex items-center gap-1">
+            Made with <span className="text-rose-500 animate-pulse">❤️</span> by <span className="text-slate-350 font-semibold hover:text-cyan-400 transition-colors">Pulkit Mishra</span> and <span className="text-slate-350 font-semibold hover:text-cyan-400 transition-colors">Deeksha Garg</span>
+          </span>
+        </footer>
+      )}
     </div>
   );
 }

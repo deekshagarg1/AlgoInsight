@@ -1,51 +1,148 @@
 import React from 'react';
-import { Terminal, Cpu, Award, ArrowRight, Code, Server, Database, Layers, Sparkles, CheckCircle2, Flame } from 'lucide-react';
+import { Terminal, Cpu, Award, ArrowRight, Code, Server, Database, Layers, Sparkles, CheckCircle2, Flame, Shuffle, StepForward, BrainCircuit, ChevronRight } from 'lucide-react';
 
 /**
- * HomePage Component (High Fidelity - Impressive Placement-Ready Design)
+ * HomePage Component (High Fidelity - Impressive & Interactive)
  * 
- * Redesigned with premium SaaS landing aesthetics:
- * - Glowing backdrop glass blobs.
- * - Dynamic split gradients for headers.
- * - Feature showcases with hover-translation, glow shadow outlines, and active state badges.
- * - A miniature "Interactive Simulator Catalog Card" highlighting Bubble Sort.
- * - Placement Metrics statistics deck.
+ * Includes:
+ * - Placement Tip Ticker: A dynamic, cycling placement tip bar positioned right below the navbar
+ *   to fill the top space beautifully and add educational value.
+ * - Dynamic Welcome Hero
+ * - Performance Metrics deck
+ * - Interactive Miniature Visualizer Card
+ * - Academic Specification Banner
+ * - Full Premium Footer (perfectly aligned at max-w-5xl)
  * 
  * @param {Object} props
  * @param {Function} props.onExplore - Callback to navigate to algorithms catalog
  */
 export default function HomePage({ onExplore }) {
+  // Miniature visualizer local states for the interactive landing page demo card
+  const [miniArray, setMiniArray] = React.useState([55, 25, 75, 40, 60]);
+  const [miniJ, setMiniJ] = React.useState(0);
+  const [miniPass, setMiniPass] = React.useState(1);
+  const [miniSwapped, setMiniSwapped] = React.useState(false);
+  const [activeCompare, setActiveCompare] = React.useState([0, 1]);
+
+  // Placement Viva Tips Ticker state
+  const [tipIndex, setTipIndex] = React.useState(0);
+  
+  const placementTips = [
+    "Bubble Sort is stable because it preserves the relative order of duplicates during adjacent swaps.",
+    "Bubble Sort runs in O(N) best-case time when the input is already sorted, thanks to the early-exit swapped check.",
+    "Bubble Sort is an in-place sorting algorithm, requiring O(1) auxiliary space to execute.",
+    "Selection Sort is unstable because it swaps non-adjacent elements, which can shuffle duplicates."
+  ];
+
+  // Cycle tips every 6 seconds
+  React.useEffect(() => {
+    const tipTimer = setInterval(() => {
+      setTipIndex(prev => (prev + 1) % placementTips.length);
+    }, 6000);
+    return () => clearInterval(tipTimer);
+  }, []);
+
+  const handleMiniShuffle = (e) => {
+    if (e) e.stopPropagation(); // Avoid triggering parent navigation
+    const shuffled = [30, 15, 80, 45, 60].sort(() => Math.random() - 0.5);
+    setMiniArray(shuffled);
+    setMiniJ(0);
+    setMiniPass(1);
+    setMiniSwapped(false);
+    setActiveCompare([0, 1]);
+  };
+
+  const handleMiniStep = (e) => {
+    if (e) e.stopPropagation(); // Avoid triggering parent navigation
+    const arr = [...miniArray];
+    const n = arr.length;
+    const limit = n - miniPass;
+
+    if (miniPass >= n) {
+      // Already sorted, restart shuffle
+      handleMiniShuffle(e);
+      return;
+    }
+
+    const currentJ = miniJ;
+    const nextJ = currentJ + 1;
+    let didSwap = false;
+
+    if (arr[currentJ] > arr[nextJ]) {
+      const temp = arr[currentJ];
+      arr[currentJ] = arr[nextJ];
+      arr[nextJ] = temp;
+      didSwap = true;
+      setMiniSwapped(true);
+    }
+
+    setMiniArray(arr);
+
+    // Index increment logic
+    if (currentJ >= limit - 1) {
+      // Pass finished, reset pointer and advance pass count
+      setMiniJ(0);
+      setMiniPass(prev => prev + 1);
+      setActiveCompare([0, 1]);
+    } else {
+      setMiniJ(nextJ);
+      setActiveCompare([nextJ, nextJ + 1]);
+    }
+  };
+
   return (
     <div className="w-full flex flex-col min-h-screen text-left relative overflow-hidden bg-slate-950">
       
-      {/* 0. DECORATIVE BACKDROP GLOWING BLOBS (Premium Visual Polish) */}
+      {/* 0. DECORATIVE BACKDROP GLOWING BLOBS */}
       <div className="absolute top-[-100px] right-[-100px] w-[350px] h-[350px] rounded-full bg-cyan-500/10 blur-[120px] pointer-events-none z-0"></div>
       <div className="absolute bottom-[100px] left-[-150px] w-[400px] h-[400px] rounded-full bg-indigo-500/10 blur-[130px] pointer-events-none z-0"></div>
 
-      {/* 1. HERO SECTION */}
-      <section className="flex flex-col items-center text-center py-20 max-w-4xl mx-auto px-4 relative z-10">
+      {/* 1. PLACEMENT Ticker announcements (Beautifully fills space below navbar) */}
+      <div className="max-w-5xl mx-auto w-full px-4 pt-4 relative z-10">
+        <div className="bg-[#161720]/45 border border-slate-900 rounded-xl p-3 flex items-center justify-between gap-4 backdrop-blur-md">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[10px] font-bold text-amber-400 shrink-0 font-sans uppercase tracking-wider animate-pulse">
+              <BrainCircuit className="w-3.5 h-3.5" />
+              <span>Viva Tip</span>
+            </div>
+            {/* Fading cycling placement tip */}
+            <p key={tipIndex} className="text-xs text-slate-400 font-medium truncate m-0 font-sans animate-in fade-in slide-in-from-bottom-1 duration-300">
+              {placementTips[tipIndex]}
+            </p>
+          </div>
+          <button 
+            onClick={onExplore}
+            className="flex items-center gap-0.5 text-[10px] font-bold text-cyan-400 hover:text-cyan-300 bg-transparent border-none cursor-pointer shrink-0 uppercase tracking-widest font-mono"
+          >
+            Start <ChevronRight className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+
+      {/* 2. HERO SECTION */}
+      <section className="flex flex-col items-center text-center py-16 max-w-4xl mx-auto px-4 relative z-10">
         
         {/* Glowing Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-cyan-500/10 to-indigo-500/10 text-cyan-300 border border-cyan-500/20 mb-8 backdrop-blur-md shadow-lg shadow-cyan-500/5 animate-pulse">
           <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-          <span>Campus Placement Edition</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <span>Interactive Computer Science Playground</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-450"></span>
         </div>
 
-        {/* Hero Title with multiple gradients */}
+        {/* Hero Title with split gradients */}
         <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight m-0 bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
-          Visualize. Debug. Master.
+          Inspect State Changes.
           <span className="block mt-1 bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
-            DSA in High Fidelity.
+            Visualize Algorithms Live.
           </span>
         </h1>
 
         {/* Subtext description */}
         <p className="mt-6 text-sm sm:text-base text-slate-400 max-w-2xl leading-relaxed">
-          An interactive snapshot state-machine playground designed for MCA students. Step inside execution steps, trace C++/Java/Python variables, and ace placement technical defense.
+          AlgoInsight is a high-fidelity learning environment designed to bridge the gap between abstract textbook syntax and real-time execution states. Step through code lines, shuffle inputs, and trace pointer transitions instantly.
         </p>
 
-        {/* CTA triggers */}
+        {/* CTA trigger */}
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-10">
           <button
             onClick={onExplore}
@@ -57,45 +154,45 @@ export default function HomePage({ onExplore }) {
         </div>
       </section>
 
-      {/* 2. CORE PERFORMANCE METRICS ROW */}
+      {/* 3. CORE PERFORMANCE METRICS ROW */}
       <section className="py-8 max-w-5xl mx-auto w-full px-4 border-t border-slate-900 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-[#161720]/40 border border-slate-900 rounded-2xl p-4 text-center">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Time Complexity</span>
-            <span className="text-lg font-extrabold text-cyan-400 font-mono">O(N²)</span>
+          <div className="bg-[#161720]/45 border border-slate-900 rounded-2xl p-4 text-center">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Trace Compilers</span>
+            <span className="text-sm font-extrabold text-cyan-400 font-mono">Java, C++, Python</span>
           </div>
-          <div className="bg-[#161720]/40 border border-slate-900 rounded-2xl p-4 text-center">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Pass Optimization</span>
-            <span className="text-lg font-extrabold text-emerald-400 font-mono">O(N) Best</span>
+          <div className="bg-[#161720]/45 border border-slate-900 rounded-2xl p-4 text-center">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">State Seek Resolution</span>
+            <span className="text-sm font-extrabold text-emerald-450 font-mono">O(1) Step Traversal</span>
           </div>
-          <div className="bg-[#161720]/40 border border-slate-900 rounded-2xl p-4 text-center">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Z-Index Jump</span>
-            <span className="text-lg font-extrabold text-amber-400 font-mono">2.5D Arch</span>
+          <div className="bg-[#161720]/45 border border-slate-900 rounded-2xl p-4 text-center">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Swapping Physics</span>
+            <span className="text-sm font-extrabold text-amber-400 font-mono">2.5D Translation</span>
           </div>
-          <div className="bg-[#161720]/40 border border-slate-900 rounded-2xl p-4 text-center">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Target Platforms</span>
-            <span className="text-lg font-extrabold text-[#ff79c6] font-mono">C++, Java, Py</span>
+          <div className="bg-[#161720]/45 border border-slate-900 rounded-2xl p-4 text-center">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">Playback range</span>
+            <span className="text-sm font-extrabold text-[#ff79c6] font-mono">0.5x to 2.0x Delay</span>
           </div>
         </div>
       </section>
 
-      {/* 3. ALGORITHM PREVIEW CATALOG (VIBRANT & IMPRESSIVE CARD) */}
+      {/* 4. ALGORITHM PREVIEW CATALOG */}
       <section className="py-12 max-w-5xl mx-auto w-full px-4 border-t border-slate-900 relative z-10">
         <div className="flex flex-col gap-3 mb-8 text-center md:text-left">
-          <span className="text-[10px] font-bold text-indigo-400 tracking-widest uppercase">Algorithms Catalog</span>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-200 tracking-tight m-0">Available Simulators</h2>
+          <span className="text-[10px] font-bold text-indigo-400 tracking-widest uppercase">Simulator Workspace</span>
+          <h2 className="text-xl sm:text-2xl font-black text-slate-200 tracking-tight m-0">Algorithms Catalog</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
           
-          {/* Card 1: Bubble Sort Showcase (Vibrant glowing mockup) */}
+          {/* Card 1: Bubble Sort Showcase (Genuinely Interactive Miniature Simulator!) */}
           <div className="p-6 rounded-2xl bg-[#161720] border border-slate-800 hover:border-cyan-500/35 transition-all duration-300 hover:shadow-[0_0_30px_rgba(6,182,212,0.06)] relative group flex flex-col justify-between">
             <div className="absolute top-4 right-4 bg-cyan-400/10 text-cyan-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-cyan-400/20">
-              Sorting
+              Active Module
             </div>
 
             <div>
-              <div className="w-10 h-10 rounded-xl bg-cyan-950/40 border border-cyan-800/60 flex items-center justify-center text-cyan-400 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-cyan-950/40 border border-cyan-800/60 flex items-center justify-center text-cyan-455 mb-4">
                 <Layers className="w-5 h-5" />
               </div>
               <h3 className="text-lg font-bold text-slate-100">Bubble Sort Visualizer</h3>
@@ -103,42 +200,87 @@ export default function HomePage({ onExplore }) {
                 Sort elements by comparing adjacent items and swapping them if they are in the wrong order. Features Z-axis arched slide jumps, dynamic line highlighting, and early-swap breaks.
               </p>
 
-              {/* Miniature visualizer mock illustration (Super impressive details!) */}
+              {/* Genuinely Interactive miniature visualizer mock container */}
               <div className="mt-4 bg-[#111219] rounded-xl border border-slate-900 p-3.5 flex flex-col gap-3">
                 <div className="flex justify-between items-center text-[9px] font-mono text-slate-500">
-                  <span>pass = 1</span>
-                  <span className="text-yellow-400 font-bold">swapped = true</span>
+                  <span>Pass = {miniPass}</span>
+                  <span className={miniSwapped ? "text-yellow-400 font-bold" : "text-slate-500"}>
+                    Swapped = {miniSwapped ? "true" : "false"}
+                  </span>
                 </div>
-                <div className="h-14 flex items-end justify-center gap-1.5 border-b border-slate-900 pb-1">
-                  <div className="w-4 h-[35%] rounded bg-slate-900 border border-slate-800"></div>
-                  <div className="w-4 h-[15%] rounded bg-slate-900 border border-slate-800"></div>
-                  <div className="w-4 h-[55%] rounded border-yellow-400 bg-yellow-950/20 border-[1.5px] shadow-[0_0_8px_rgba(250,204,21,0.25)] relative"></div>
-                  <div className="w-4 h-[40%] rounded border-yellow-400 bg-yellow-950/20 border-[1.5px] shadow-[0_0_8px_rgba(250,204,21,0.25)] relative"></div>
-                  <div className="w-4 h-[80%] rounded-md bg-gradient-to-t from-[#047857] via-[#10b981] to-[#a7f3d0] border border-[#55f0b5]"></div>
+                
+                {/* Dynamic Height Bars representing mini sorting array */}
+                <div className="h-14 flex items-end justify-center gap-2 border-b border-slate-900 pb-1">
+                  {miniArray.map((value, idx) => {
+                    const isComparing = activeCompare.includes(idx);
+                    const isSorted = idx >= miniArray.length - miniPass + 1;
+
+                    let barClass = "bg-slate-900 border border-slate-800";
+                    if (isComparing) {
+                      barClass = "border-yellow-400 bg-yellow-950/20 border-[1.5px] shadow-[0_0_8px_rgba(250,204,21,0.25)]";
+                    } else if (isSorted) {
+                      barClass = "bg-gradient-to-t from-[#047857] via-[#10b981] to-[#a7f3d0] border border-[#55f0b5]";
+                    }
+
+                    return (
+                      <div
+                        key={idx}
+                        className={`w-5 rounded transition-all duration-300 ${barClass}`}
+                        style={{ height: `${value}%` }}
+                      ></div>
+                    );
+                  })}
                 </div>
-                <div className="flex justify-center gap-1.5 text-[8px] font-bold font-mono text-slate-500">
-                  <span>0</span>
-                  <span>1</span>
-                  <span className="text-cyan-400 font-bold">j</span>
-                  <span className="text-yellow-400 font-bold">j+1</span>
-                  <span>4</span>
+
+                {/* Dynamic index / pointer circles */}
+                <div className="flex justify-center gap-2 text-[8px] font-bold font-mono text-slate-500 h-3">
+                  {miniArray.map((_, idx) => {
+                    const isJ = idx === miniJ;
+                    const isJP1 = idx === miniJ + 1;
+
+                    if (isJ) return <span key={idx} className="text-cyan-400 font-bold w-5 text-center">j</span>;
+                    if (isJP1) return <span key={idx} className="text-yellow-400 font-bold w-5 text-center">j+1</span>;
+                    return <span key={idx} className="w-5 text-center">{idx}</span>;
+                  })}
                 </div>
+
+                {/* Interactive controller triggers directly inside the card deck! */}
+                <div className="flex items-center justify-between mt-1 pt-2 border-t border-slate-900/60">
+                  <span className="text-[8px] text-slate-550 font-mono tracking-wide">TRY PREVIEW SIMULATOR:</span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleMiniShuffle}
+                      className="px-2.5 py-1 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white rounded text-[8px] font-bold flex items-center gap-1 cursor-pointer transition-all"
+                      title="Generate new unsorted mock array"
+                    >
+                      <Shuffle className="w-2.5 h-2.5" /> Shuffle
+                    </button>
+                    <button
+                      onClick={handleMiniStep}
+                      className="px-2.5 py-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 rounded text-[8px] font-bold flex items-center gap-1 cursor-pointer transition-all"
+                      title="Trace next visual sorting snapshot"
+                    >
+                      <StepForward className="w-2.5 h-2.5" /> Step Sort
+                    </button>
+                  </div>
+                </div>
+
               </div>
             </div>
 
             <button
               onClick={onExplore}
-              className="mt-6 w-full py-2.5 font-bold text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded-xl transition-all cursor-pointer border-none text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5"
+              className="mt-5 w-full py-2.5 font-bold text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded-xl transition-all cursor-pointer border-none text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5"
             >
               Test Bubble Sort Live
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          {/* Card 2: Upcoming algorithms catalog list placeholder */}
-          <div className="p-6 rounded-2xl bg-[#161720]/45 border border-slate-900 hover:border-slate-800/80 transition-all duration-300 flex flex-col justify-between h-[380px] opacity-70">
+          {/* Card 2: Upcoming catalog list placeholder */}
+          <div className="p-6 rounded-2xl bg-[#161720]/45 border border-slate-900 hover:border-slate-800/80 transition-all duration-300 flex flex-col justify-between h-[410px] opacity-70">
             <div>
-              <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-850 flex items-center justify-center text-slate-500 mb-4">
                 <Sparkles className="w-5 h-5" />
               </div>
               <h3 className="text-lg font-bold text-slate-350">Upcoming Simulators</h3>
@@ -167,7 +309,7 @@ export default function HomePage({ onExplore }) {
         </div>
       </section>
 
-      {/* 4. ACADEMIC PROJECT OVERVIEW & DETAILS BANNER */}
+      {/* 5. ACADEMIC PROJECT OVERVIEW & DETAILS BANNER */}
       <section className="py-12 max-w-5xl mx-auto w-full px-4 border-t border-slate-900 relative z-10">
         <div className="bg-gradient-to-br from-[#161720] to-[#111219] border border-slate-800/60 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl">
           <div className="flex flex-col gap-2.5 max-w-xl">
@@ -195,9 +337,9 @@ export default function HomePage({ onExplore }) {
         </div>
       </section>
 
-      {/* 5. COMPREHENSIVE PREMIUM FOOTER */}
+      {/* 6. COMPREHENSIVE PREMIUM FOOTER */}
       <footer className="mt-auto border-t border-slate-900 bg-slate-950/60 py-12 px-4 sm:px-6 lg:px-8 z-10">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 pb-8 border-b border-slate-900">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 pb-8 border-b border-slate-900">
           
           {/* Logo & credits (col-span 5) */}
           <div className="md:col-span-5 flex flex-col gap-4">
@@ -267,7 +409,7 @@ export default function HomePage({ onExplore }) {
         </div>
 
         {/* Bottom credits */}
-        <div className="max-w-6xl mx-auto pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-[11px] text-slate-500 font-mono">
+        <div className="max-w-5xl mx-auto pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-[11px] text-slate-500 font-mono">
           <span>
             © {new Date().getFullYear()} AlgoInsight. All rights reserved.
           </span>

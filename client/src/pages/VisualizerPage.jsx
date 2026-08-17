@@ -7,7 +7,7 @@ import CodePanel from '../components/CodePanel';
 import { Bookmark } from 'lucide-react';
 
 /**
- * VisualizerPage Component (High Fidelity with Fullscreen Support)
+ * VisualizerPage Component (High Fidelity Workspace)
  * 
  * Arranges the split view:
  * - Left panel: Interactive Code highlight panel
@@ -19,10 +19,9 @@ export default function VisualizerPage() {
   const [steps, setSteps] = React.useState([]);
   const [currentStepIndex, setCurrentStepIndex] = React.useState(0);
   const [isPlaying, setIsPlaying] = React.useState(false);
-  const [speed, setSpeed] = React.useState(1600); // 0.5x (1600ms delay)
+  const [speed, setSpeed] = React.useState(1600); // 0.5x (1600ms delay) default
   const [isFullscreen, setIsFullscreen] = React.useState(false);
 
-  // Reference container for HTML5 Fullscreen API
   const containerRef = React.useRef(null);
 
   // Recalculate steps whenever array changes
@@ -33,7 +32,7 @@ export default function VisualizerPage() {
     setIsPlaying(false);
   }, [array]);
 
-  // Timer loop
+  // Playback timer loop
   React.useEffect(() => {
     let timer = null;
 
@@ -54,7 +53,7 @@ export default function VisualizerPage() {
     };
   }, [isPlaying, steps, speed]);
 
-  // Monitor fullscreen change events (e.g. Esc button presses)
+  // Monitor fullscreen events
   React.useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -92,7 +91,6 @@ export default function VisualizerPage() {
     setArray(newArray);
   };
 
-  // Fullscreen toggle logic
   const handleToggleFullscreen = () => {
     if (!containerRef.current) return;
 
@@ -137,7 +135,7 @@ export default function VisualizerPage() {
       </div>
 
       {/* Main Two-Column Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
         
         {/* Left Column: CodePanel */}
         <div className="lg:col-span-5 h-full">
@@ -145,7 +143,7 @@ export default function VisualizerPage() {
         </div>
 
         {/* Right Column: Visualizer Canvas + Inputs */}
-        <div className="lg:col-span-7 flex flex-col gap-6 w-full">
+        <div className="lg:col-span-7 flex flex-col gap-4 w-full">
           {/* Input control panels */}
           <VisualizerInput
             array={array}
@@ -165,12 +163,12 @@ export default function VisualizerPage() {
           />
 
           {/* Bottom Step explanation banner with left solid emerald line indicator */}
-          <div className="w-full bg-slate-950 border border-slate-900 rounded-xl p-4 flex items-center gap-3 relative shadow-inner overflow-hidden">
+          <div className="w-full bg-slate-950 border border-slate-900 rounded-xl p-4 flex items-center gap-3 relative shadow-inner overflow-hidden mt-2">
             <div className="absolute left-0 inset-y-0 w-1 bg-emerald-400"></div>
             <span className="font-mono text-xs text-slate-500 font-bold uppercase shrink-0 pl-1">
               Step:
             </span>
-            <p className="text-xs sm:text-sm font-medium text-slate-350 leading-relaxed font-sans">
+            <p className="text-xs sm:text-sm font-medium text-slate-350 leading-relaxed font-sans m-0">
               {currentStep.explanation}
             </p>
           </div>
