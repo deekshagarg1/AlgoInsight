@@ -3,11 +3,51 @@ import Navbar from './components/Navbar';
 import HomePage from './pages/HomePage';
 import AlgorithmsPage from './pages/AlgorithmsPage';
 import VisualizerPage from './pages/VisualizerPage';
+import CoursesPage from './pages/CoursesPage';
+import PracticePage from './pages/PracticePage';
 import { BookOpen, LayoutDashboard, BrainCircuit } from 'lucide-react';
 
 function App() {
   const [activeTab, setActiveTab] = React.useState('home');
   const [selectedAlgoId, setSelectedAlgoId] = React.useState('bubble-sort');
+
+  // Sync state from URL Hash (supports back/forward browser buttons)
+  React.useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#/', '');
+      if (!hash) {
+        setActiveTab('home');
+        return;
+      }
+
+      const parts = hash.split('/');
+      const tab = parts[0];
+      const algo = parts[1];
+
+      if (['home', 'algorithms', 'visualizer', 'courses', 'practice', 'dashboard'].includes(tab)) {
+        setActiveTab(tab);
+        if (tab === 'visualizer' && algo) {
+          setSelectedAlgoId(algo);
+        }
+      }
+    };
+
+    // Run once on load
+    handleHashChange();
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  // Update URL Hash when state changes
+  React.useEffect(() => {
+    const currentHash = window.location.hash.replace('#/', '');
+    const expectedHash = activeTab === 'visualizer' ? `visualizer/${selectedAlgoId}` : activeTab;
+    
+    if (currentHash !== expectedHash) {
+      window.location.hash = `#/${expectedHash}`;
+    }
+  }, [activeTab, selectedAlgoId]);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -30,24 +70,15 @@ function App() {
         return <VisualizerPage selectedAlgoId={selectedAlgoId} />;
       case 'courses':
         return (
-          <div className="flex flex-col items-center justify-center text-center py-20 bg-slate-900/40 border border-slate-800 rounded-3xl p-8 max-w-2xl mx-auto">
-            <BookOpen className="w-12 h-12 text-indigo-400 mb-4 animate-bounce" />
-            <h2 className="text-xl font-bold text-slate-200">Interactive Courses — Coming Soon</h2>
-            <p className="text-sm text-slate-400 mt-2 max-w-md">
-              We are working on conceptual structured notes for Arrays, Linked Lists, Stack, and Queue.
-            </p>
-          </div>
+          <CoursesPage 
+            onExploreAlgo={(id) => {
+              setSelectedAlgoId(id);
+              setActiveTab('visualizer');
+            }} 
+          />
         );
       case 'practice':
-        return (
-          <div className="flex flex-col items-center justify-center text-center py-20 bg-slate-900/40 border border-slate-800 rounded-3xl p-8 max-w-2xl mx-auto">
-            <BrainCircuit className="w-12 h-12 text-emerald-400 mb-4 animate-bounce" />
-            <h2 className="text-xl font-bold text-slate-200">Practice Quiz & Dry-Runs — Coming Soon</h2>
-            <p className="text-sm text-slate-400 mt-2 max-w-md">
-              Test your understanding of complexity thresholds and step-prediction problems.
-            </p>
-          </div>
-        );
+        return <PracticePage />;
       case 'dashboard':
         return (
           <div className="flex flex-col items-center justify-center text-center py-20 bg-slate-900/40 border border-slate-800 rounded-3xl p-8 max-w-2xl mx-auto">

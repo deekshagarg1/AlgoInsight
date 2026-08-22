@@ -16,7 +16,7 @@ import { ChevronUp, ChevronDown, Check, Edit2, AlertCircle } from 'lucide-react'
  * @param {Function} props.onGenerateArray - Callback to submit updated array
  * @param {boolean} props.disabled - Disable updates during active playback loop
  */
-export default function VisualizerInput({ array, onGenerateArray, disabled }) {
+export default function VisualizerInput({ array, onGenerateArray, disabled, selectedAlgoId }) {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [isEditingCustom, setIsEditingCustom] = React.useState(false);
   const [customText, setCustomText] = React.useState('');
@@ -28,7 +28,16 @@ export default function VisualizerInput({ array, onGenerateArray, disabled }) {
     setCustomText(array.join(', '));
   }, [array]);
 
-  const presets = [
+  const isCountingSort = selectedAlgoId === 'counting-sort';
+
+  const presets = isCountingSort ? [
+    { id: 'STANDARD', label: 'Standard', data: [4, 2, 2, 8, 3, 3, 1] },
+    { id: 'SMALL', label: 'Small', data: [3, 1, 4, 1, 5] },
+    { id: 'REVERSE', label: 'Reverse Sorted', data: [9, 8, 6, 4, 3, 2, 1] },
+    { id: 'SORTED', label: 'Already Sorted', data: [1, 2, 3, 4, 5, 6, 7] },
+    { id: 'NEARLY_SORTED', label: 'Nearly Sorted', data: [1, 2, 4, 3, 5, 6, 7] },
+    { id: 'ALL_EQUAL', label: 'All Equal', data: [5, 5, 5, 5, 5, 5, 5] }
+  ] : [
     { id: 'STANDARD', label: 'Standard', data: [64, 34, 25, 12, 22, 11, 90] },
     { id: 'SMALL', label: 'Small', data: [25, 12, 34, 11, 9] },
     { id: 'REVERSE', label: 'Reverse Sorted', data: [90, 64, 34, 25, 22, 12, 11] },
@@ -62,9 +71,10 @@ export default function VisualizerInput({ array, onGenerateArray, disabled }) {
       return;
     }
 
-    const outOfBounds = numbers.some((n) => n > 100 || n < 1);
+    const maxLimit = isCountingSort ? 9 : 100;
+    const outOfBounds = numbers.some((n) => n > maxLimit || n < 1);
     if (outOfBounds) {
-      setError('Please input values between 1 and 100.');
+      setError(`Please input values between 1 and ${maxLimit} ${isCountingSort ? '(to fit count indexes on screen)' : ''}.`);
       return;
     }
 

@@ -151,7 +151,7 @@ export default function CodePanel({ highlightedLines = [], isLoopFalse = false, 
   };
 
   return (
-    <div className="w-full bg-[#1e1f29] border border-[#20212b]/80 rounded-2xl flex flex-col overflow-hidden shadow-2xl h-full min-h-[330px]">
+    <div className="w-full bg-[#1e1f29] border border-[#20212b]/80 rounded-2xl flex flex-col overflow-hidden shadow-2xl h-full min-h-[460px] lg:min-h-0 relative z-10">
       
       {/* Dracula Header */}
       <div className="bg-[#21222c] px-4 py-3 border-b border-[#181920] flex justify-between items-center shrink-0">
@@ -200,7 +200,7 @@ export default function CodePanel({ highlightedLines = [], isLoopFalse = false, 
         }}
       >
         {/* min-w-max prevents horizontal cutoff of highlighted line backgrounds */}
-        <div className="min-w-max pr-6">
+        <div className="min-w-max pr-6 pb-6">
           {activeCode.map((line) => {
             const isHighlighted = highlightedLines.includes(line.num);
             let style = { bg: '', border: 'border-l-[3px] border-transparent', numberColor: 'text-[#6272a4]' };

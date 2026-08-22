@@ -2,6 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 require('dotenv').config();
+const connectDB = require('./config/db');
+
+// Connect to Database
+connectDB();
 
 const app = express();
 
@@ -19,7 +23,10 @@ app.get('/', (req, res) => {
 
 // Routes
 const healthRouter = require('./routes/health');
+const algorithmsRouter = require('./routes/algorithms');
+
 app.use('/api', healthRouter);
+app.use('/api/algorithms', algorithmsRouter);
 
 // Port configuration
 const PORT = process.env.PORT || 5000;

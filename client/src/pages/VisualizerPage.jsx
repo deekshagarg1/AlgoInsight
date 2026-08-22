@@ -2,6 +2,8 @@ import React from 'react';
 import { generateBubbleSortSteps } from '../engine/algorithms/bubbleSort';
 import { generateSelectionSortSteps } from '../engine/algorithms/selectionSort';
 import { generateInsertionSortSteps } from '../engine/algorithms/insertionSort';
+import { generateMergeSortSteps } from '../engine/algorithms/mergeSort';
+import { generateCountingSortSteps } from '../engine/algorithms/countingSort';
 import BarVisualizer from '../components/BarVisualizer';
 import PlaybackControls from '../components/PlaybackControls';
 import VisualizerInput from '../components/VisualizerInput';
@@ -26,8 +28,35 @@ export default function VisualizerPage({ selectedAlgoId = 'bubble-sort' }) {
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [speed, setSpeed] = React.useState(1600); // 0.5x (1600ms delay) default
   const [isFullscreen, setIsFullscreen] = React.useState(false);
+  const [apiCodeData, setApiCodeData] = React.useState(null);
 
   const containerRef = React.useRef(null);
+
+  // Fetch algorithm code snippet from backend on select
+  React.useEffect(() => {
+    let active = true;
+    const fetchCode = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/algorithms/${selectedAlgoId}`);
+        if (!res.ok) throw new Error('API Error');
+        const data = await res.json();
+        if (active && data && data.code) {
+          setApiCodeData(data.code);
+        }
+      } catch (err) {
+        console.warn(`Could not fetch dynamic code for ${selectedAlgoId} from backend, falling back to local files.`, err);
+        if (active) {
+          setApiCodeData(null); // Triggers fallback
+        }
+      }
+    };
+
+    fetchCode();
+
+    return () => {
+      active = false;
+    };
+  }, [selectedAlgoId]);
 
   // Dynamic algorithm routing map
   const algoMeta = {
@@ -45,13 +74,36 @@ export default function VisualizerPage({ selectedAlgoId = 'bubble-sort' }) {
       name: 'Insertion Sort',
       engine: generateInsertionSortSteps,
       code: INSERTION_SORT_CODE
+    },
+    'merge-sort': {
+      name: 'Merge Sort',
+      engine: generateMergeSortSteps,
+      code: { java: [], cpp: [], python: [] }
+    },
+    'counting-sort': {
+      name: 'Counting Sort',
+      engine: generateCountingSortSteps,
+      code: { java: [], cpp: [], python: [] }
     }
   };
 
   const currentAlgo = algoMeta[selectedAlgoId] || algoMeta['bubble-sort'];
 
+  // Reset array data to proper defaults when algorithm selection changes
+  React.useEffect(() => {
+    if (selectedAlgoId === 'counting-sort') {
+      setArray([4, 2, 2, 8, 3, 3, 1]);
+    } else {
+      setArray([64, 34, 25, 12, 22, 11, 90]);
+    }
+  }, [selectedAlgoId]);
+
   // Recalculate steps whenever array or selectedAlgoId changes
   React.useEffect(() => {
+    // Guard clause: skip generating steps if the array hasn't synced with Counting Sort constraints yet
+    if (selectedAlgoId === 'counting-sort' && array.some(v => v > 9)) {
+      return;
+    }
     const generatedSteps = currentAlgo.engine(array);
     setSteps(generatedSteps);
     setCurrentStepIndex(0);
@@ -96,18 +148,21 @@ export default function VisualizerPage({ selectedAlgoId = 'bubble-sort' }) {
   };
 
   const handleNext = () => {
+    setIsPlaying(false);
     if (currentStepIndex < steps.length - 1) {
       setCurrentStepIndex((prev) => prev + 1);
     }
   };
 
   const handlePrev = () => {
+    setIsPlaying(false);
     if (currentStepIndex > 0) {
       setCurrentStepIndex((prev) => prev - 1);
     }
   };
 
   const handleStepJump = (idx) => {
+    setIsPlaying(false);
     if (idx >= 0 && idx < steps.length) {
       setCurrentStepIndex(idx);
     }
@@ -164,11 +219,11 @@ export default function VisualizerPage({ selectedAlgoId = 'bubble-sort' }) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
         
         {/* Left Column: CodePanel */}
-        <div className="lg:col-span-5 h-full">
+        <div className="lg:col-span-5 h-full flex flex-col min-h-0">
           <CodePanel 
             highlightedLines={currentStep.highlightedLines} 
             isLoopFalse={currentStep.isLoopFalse} 
-            codeData={currentAlgo.code} 
+            codeData={apiCodeData || currentAlgo.code} 
           />
         </div>
 
@@ -179,6 +234,7 @@ export default function VisualizerPage({ selectedAlgoId = 'bubble-sort' }) {
             array={array}
             onGenerateArray={handleGenerateArray}
             disabled={isPlaying}
+            selectedAlgoId={selectedAlgoId}
           />
 
           {/* Bar Visual Canvas */}
@@ -195,6 +251,17 @@ export default function VisualizerPage({ selectedAlgoId = 'bubble-sort' }) {
             i={currentStep.i !== undefined ? currentStep.i : -1}
             j={currentStep.j !== undefined ? currentStep.j : -1}
             keyValue={currentStep.keyValue !== undefined ? currentStep.keyValue : -1}
+            tempArray={currentStep.tempArray || []}
+            depth={currentStep.depth || 0}
+            leftRange={currentStep.leftRange || []}
+            rightRange={currentStep.rightRange || []}
+            countArray={currentStep.countArray || []}
+            outputArray={currentStep.outputArray || []}
+            phase={currentStep.phase || ''}
+            valuesRange={currentStep.valuesRange || []}
+            activeArrIdx={currentStep.activeArrIdx !== undefined ? currentStep.activeArrIdx : -1}
+            activeCountIdx={currentStep.activeCountIdx !== undefined ? currentStep.activeCountIdx : -1}
+            activeOutputIdx={currentStep.activeOutputIdx !== undefined ? currentStep.activeOutputIdx : -1}
           />
 
           {/* Bottom Step explanation banner with left solid emerald line indicator */}

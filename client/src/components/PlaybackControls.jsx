@@ -64,8 +64,8 @@ export default function PlaybackControls({
         {/* Previous Step */}
         <button
           onClick={onPrev}
-          disabled={currentStep === 0 || isPlaying}
-          className="p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 cursor-pointer hover:border-cyan-500/20"
+          disabled={currentStep === 0}
+          className="p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-350 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 cursor-pointer hover:border-cyan-500/20"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
@@ -73,8 +73,8 @@ export default function PlaybackControls({
         {/* Next Step */}
         <button
           onClick={onNext}
-          disabled={currentStep >= totalSteps - 1 || isPlaying}
-          className="p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 cursor-pointer hover:border-cyan-500/20"
+          disabled={currentStep >= totalSteps - 1}
+          className="p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-350 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 cursor-pointer hover:border-cyan-500/20"
         >
           <ChevronRight className="w-4 h-4" />
         </button>
@@ -94,9 +94,8 @@ export default function PlaybackControls({
             min={0}
             max={totalSteps > 0 ? totalSteps - 1 : 0}
             value={currentStep}
-            disabled={isPlaying}
             onChange={handleScrubberChange}
-            className="w-full h-4 opacity-0 z-10 cursor-pointer disabled:cursor-not-allowed relative"
+            className="w-full h-4 opacity-0 z-10 cursor-pointer relative"
           />
           <div 
             className="absolute w-3.5 h-3.5 rounded-full bg-white shadow-md border-2 border-emerald-500 pointer-events-none transition-all duration-150"

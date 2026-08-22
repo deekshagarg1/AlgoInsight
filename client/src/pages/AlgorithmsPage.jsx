@@ -67,7 +67,7 @@ export default function AlgorithmsPage({ onSelectAlgo }) {
       time: 'O(N log N)',
       space: 'O(N)',
       stable: 'Stable',
-      isActive: false
+      isActive: true
     },
     {
       id: 'quick-sort',
@@ -79,6 +79,17 @@ export default function AlgorithmsPage({ onSelectAlgo }) {
       space: 'O(log N)',
       stable: 'Unstable',
       isActive: false
+    },
+    {
+      id: 'counting-sort',
+      name: 'Counting Sort',
+      desc: 'Non-comparison-based linear sort that counts occurrences of elements.',
+      difficulty: 'Medium',
+      difficultyColor: 'text-amber-450 bg-amber-950/20 border-amber-500/25',
+      time: 'O(N+K)',
+      space: 'O(N+K)',
+      stable: 'Stable',
+      isActive: true
     }
   ];
 

@@ -31,9 +31,144 @@ export default function BarVisualizer({
   algoId = 'bubble-sort',
   i = -1,
   j = -1,
-  keyValue = -1
+  keyValue = -1,
+  tempArray = [],
+  depth = 1,
+  leftRange = [],
+  rightRange = [],
+  countArray = [],
+  outputArray = [],
+  phase = '',
+  valuesRange = [],
+  activeArrIdx = -1,
+  activeCountIdx = -1,
+  activeOutputIdx = -1
 }) {
   const maxValue = array.length > 0 ? Math.max(...array.map(item => item.value)) : 100;
+
+  if (algoId === 'counting-sort') {
+    return (
+      <div className="w-full bg-[#161720] border border-slate-800 rounded-2xl p-5 relative flex flex-col shadow-2xl overflow-hidden min-h-[340px] justify-between">
+        
+        {/* Top parameter indicators */}
+        <div className="flex justify-between items-center w-full mb-4 font-mono text-[10px] font-bold text-slate-500 z-10 px-1">
+          <div>
+            <span>phase = </span>
+            <span className="text-[#38bdf8] font-extrabold">{phase || 'count'}</span>
+          </div>
+          <div>
+            <span>values = </span>
+            <span className="text-yellow-400 font-extrabold">
+              {valuesRange && valuesRange.length === 2 ? `${valuesRange[0]}..${valuesRange[1]}` : '1..8'}
+            </span>
+          </div>
+        </div>
+
+        {/* Grid Rows Container */}
+        <div className="flex flex-col gap-6 w-full items-center my-auto">
+          
+          {/* ROW 1: arr (original array) */}
+          <div className="flex items-center gap-4 w-full justify-center">
+            <span className="font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest w-12 text-right">
+              arr
+            </span>
+            <div className="flex gap-2">
+              {array.map((item, idx) => {
+                const isActive = idx === activeArrIdx;
+                return (
+                  <div key={`arr-${idx}`} className="flex flex-col items-center gap-1 w-10">
+                    <span className={`text-[10px] font-bold font-mono ${isActive ? 'text-yellow-400 font-extrabold' : 'text-slate-400'}`}>
+                      {item.value}
+                    </span>
+                    <div className={`w-10 h-7 rounded-lg border flex items-center justify-center transition-all ${
+                      isActive 
+                        ? 'border-yellow-450 bg-yellow-450/10 shadow-[0_0_10px_rgba(250,204,21,0.25)] scale-105'
+                        : 'border-[#2c2d3a] bg-[#1a1b24]'
+                    }`}>
+                      <div className={`w-6 h-1.5 rounded-full ${isActive ? 'bg-yellow-400' : 'bg-slate-700'}`} />
+                    </div>
+                    <span className="text-[8px] font-bold font-mono text-slate-600">
+                      {idx}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ROW 2: count (auxiliary frequency array) */}
+          <div className="flex items-center gap-4 w-full justify-center">
+            <span className="font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest w-12 text-right">
+              count
+            </span>
+            <div className="flex gap-2">
+              {countArray.slice(1).map((val, idx) => {
+                const countIdx = idx + 1; // 1-indexed for display
+                const isActive = countIdx === activeCountIdx;
+                return (
+                  <div key={`count-${countIdx}`} className="flex flex-col items-center gap-1 w-10">
+                    <div className={`w-10 h-7 rounded-lg border flex items-center justify-center transition-all font-mono text-[11px] font-black ${
+                      isActive 
+                        ? 'border-[#06b6d4] text-[#06b6d4] bg-[#06b6d4]/10 shadow-[0_0_10px_rgba(6,182,212,0.35)] scale-105'
+                        : 'border-[#2c2d3a] text-slate-400 bg-[#1a1b24]'
+                    }`}>
+                      {val}
+                    </div>
+                    <span className="text-[8px] font-bold font-mono text-slate-655">
+                      {countIdx}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ROW 3: output (auxiliary sorted array) */}
+          <div className="flex items-center gap-4 w-full justify-center">
+            <span className="font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest w-12 text-right">
+              output
+            </span>
+            <div className="flex gap-2">
+              {outputArray.map((item, idx) => {
+                const isActive = idx === activeOutputIdx;
+                const hasValue = item !== null && item !== undefined;
+                return (
+                  <div key={`output-${idx}`} className="flex flex-col items-center gap-1 w-10">
+                    <span className={`text-[10px] font-bold font-mono ${isActive ? 'text-emerald-400 font-extrabold' : 'text-slate-450'}`}>
+                      {hasValue ? item.value : ''}
+                    </span>
+                    <div className={`w-10 h-7 rounded-lg border flex items-center justify-center transition-all ${
+                      isActive 
+                        ? 'border-[#34d399] bg-[#34d399]/15 shadow-[0_0_12px_rgba(52,211,153,0.35)] scale-105'
+                        : hasValue
+                          ? 'border-emerald-500/35 bg-emerald-950/15'
+                          : 'border-dashed border-[#2c2d3a] bg-transparent'
+                    }`}>
+                      {hasValue && (
+                        <div className="w-6 h-3 rounded bg-[#10b981] shadow-[0_0_6px_rgba(52,211,153,0.3)] animate-fade-in" />
+                      )}
+                    </div>
+                    <span className="text-[8px] font-bold font-mono text-slate-600">
+                      {idx}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Centered bottom comparison / transition expression text */}
+        <div className="w-full text-center h-8 flex items-center justify-center mt-3 border-t border-slate-900/60 pt-2.5">
+          {operationText && (
+            <span className="text-[10px] font-mono text-yellow-300 font-bold tracking-wide bg-[#facc15]/5 px-3 py-1 rounded border border-[#facc15]/10 shadow-[0_0_8px_rgba(250,204,21,0.03)]">
+              {operationText}
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full bg-[#161720] border border-slate-800 rounded-2xl p-4 relative flex flex-col shadow-2xl overflow-hidden min-h-[190px]">
@@ -41,8 +176,17 @@ export default function BarVisualizer({
       {/* Top parameters indicators */}
       <div className="flex justify-between items-center w-full mb-3 font-mono text-[10px] font-bold text-slate-500 z-10 px-1">
         <div>
-          <span>pass = </span>
-          <span className="text-cyan-400 font-extrabold">{pass || 0}</span>
+          {algoId === 'merge-sort' ? (
+            <>
+              <span>depth = </span>
+              <span className="text-[#38bdf8] font-extrabold">{depth || 1}</span>
+            </>
+          ) : (
+            <>
+              <span>pass = </span>
+              <span className="text-cyan-400 font-extrabold">{pass || 0}</span>
+            </>
+          )}
         </div>
         <div>
           <span>swapped = </span>
@@ -175,8 +319,8 @@ export default function BarVisualizer({
           const isSorted = sortedIndices.includes(idx);
 
           // Pointers resolution for Insertion Sort vs others
-          const showI = algoId === 'insertion-sort' ? (i === idx && i >= 0) : isFirstActive;
-          const showJ = algoId === 'insertion-sort' ? (j === idx && j >= 0) : isSecondActive;
+          const showI = (algoId === 'insertion-sort' || algoId === 'merge-sort') ? (i === idx && i >= 0) : isFirstActive;
+          const showJ = (algoId === 'insertion-sort' || algoId === 'merge-sort') ? (j === idx && j >= 0) : isSecondActive;
           const anyActivePointer = showI || showJ;
 
           // If minIndex/key overlaps with showI or showJ, stack it lower to keep both labels visible
@@ -212,14 +356,27 @@ export default function BarVisualizer({
                 {idx}
               </span>
 
-              {/* Sorted contiguous green underline (Bridges gaps with negative X offsets) */}
+              {/* Sorted contiguous green underline or Merge Sort Left/Right run lines */}
               <div className="w-full h-[3px] mt-0.5 relative">
-                {isSorted && (
-                  <motion.div 
-                    layoutId={`sorted-line-${idx}`}
-                    className="absolute inset-x-[-5px] h-full bg-[#10b981] shadow-[0_0_8px_rgba(16,185,129,0.5)] rounded-full"
-                    transition={{ type: 'spring', stiffness: 90, damping: 15 }}
-                  />
+                {algoId === 'merge-sort' ? (
+                  <>
+                    {leftRange && leftRange.length === 2 && idx >= leftRange[0] && idx <= leftRange[1] && (
+                      <div className="absolute inset-x-[-5px] h-full bg-[#06b6d4] shadow-[0_0_8px_rgba(6,182,212,0.5)] rounded-full" />
+                    )}
+                    {rightRange && rightRange.length === 2 && idx >= rightRange[0] && idx <= rightRange[1] && (
+                      <div className="absolute inset-x-[-5px] h-full bg-[#facc15] shadow-[0_0_8px_rgba(250,204,21,0.5)] rounded-full" />
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {isSorted && (
+                      <motion.div 
+                        layoutId={`sorted-line-${idx}`}
+                        className="absolute inset-x-[-5px] h-full bg-[#10b981] shadow-[0_0_8px_rgba(16,185,129,0.5)] rounded-full"
+                        transition={{ type: 'spring', stiffness: 90, damping: 15 }}
+                      />
+                    )}
+                  </>
                 )}
               </div>
 
@@ -267,12 +424,58 @@ export default function BarVisualizer({
 
       {/* Floating Bottom Comparison Expression */}
       <div className="w-full text-center h-6 flex items-center justify-center mt-2">
-        {operationText && (
+        {operationText && algoId !== 'merge-sort' && (
           <span className="text-xs font-bold text-yellow-300 font-mono tracking-wide">
             {operationText}
           </span>
         )}
       </div>
+
+      {/* 3. Merge Sort Secondary Temp Array Row */}
+      {algoId === 'merge-sort' && tempArray && tempArray.length > 0 && (
+        <div className="w-full mt-4 pt-3 border-t border-slate-900/60 flex flex-col items-center gap-2">
+          {/* Comparison expression label (centered above temp array) */}
+          {operationText && (
+            <div className="text-[10px] font-mono text-[#38bdf8] font-extrabold tracking-wider bg-[#06b6d4]/5 px-3 py-1 rounded border border-[#06b6d4]/10 shadow-[0_0_10px_rgba(6,182,212,0.03)] mb-1">
+              {operationText}
+            </div>
+          )}
+
+          <div className="flex items-center gap-3">
+            {/* Label 'temp' on the left */}
+            <span className="font-mono text-[9px] font-bold text-slate-500 uppercase tracking-widest pl-1 shrink-0">
+              temp
+            </span>
+
+            {/* Temp Array columns */}
+            <div className="flex items-center gap-2 select-none h-11">
+              {tempArray.map((item, tIdx) => {
+                // Determine height/scale for visual comparison
+                const tempHeightPercent = maxValue > 0 ? (item.value / maxValue) * 55 : 0;
+
+                return (
+                  <motion.div
+                    key={`temp-${item.id}`}
+                    layoutId={`temp-item-${item.id}`}
+                    className="w-7 h-full flex flex-col justify-end items-center relative"
+                  >
+                    {/* Tiny value text */}
+                    <span className="text-[8px] font-mono font-bold text-slate-400 mb-0.5">
+                      {item.value}
+                    </span>
+
+                    {/* Compact bar outline */}
+                    <div 
+                      className="w-full bg-[#161720] border-[1.5px] border-cyan-500/50 rounded-md shadow-[0_0_6px_rgba(6,182,212,0.15)]"
+                      style={{ height: `${tempHeightPercent}%` }}
+                    />
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
