@@ -7,6 +7,7 @@ import { BookOpen, LayoutDashboard, BrainCircuit } from 'lucide-react';
 
 function App() {
   const [activeTab, setActiveTab] = React.useState('home');
+  const [selectedAlgoId, setSelectedAlgoId] = React.useState('bubble-sort');
 
   const renderContent = () => {
     switch (activeTab) {
@@ -20,14 +21,13 @@ function App() {
         return (
           <AlgorithmsPage 
             onSelectAlgo={(id) => {
-              if (id === 'bubble-sort') {
-                setActiveTab('visualizer');
-              }
+              setSelectedAlgoId(id);
+              setActiveTab('visualizer');
             }} 
           />
         );
       case 'visualizer':
-        return <VisualizerPage />;
+        return <VisualizerPage selectedAlgoId={selectedAlgoId} />;
       case 'courses':
         return (
           <div className="flex flex-col items-center justify-center text-center py-20 bg-slate-900/40 border border-slate-800 rounded-3xl p-8 max-w-2xl mx-auto">
@@ -69,7 +69,7 @@ function App() {
       <Navbar activeTab={activeTab} onChangeTab={setActiveTab} />
 
       {/* Main Responsive Container */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col justify-center">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-10 flex flex-col justify-center">
         {renderContent()}
       </main>
 

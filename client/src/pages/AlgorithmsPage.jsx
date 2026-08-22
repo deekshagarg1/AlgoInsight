@@ -34,7 +34,7 @@ export default function AlgorithmsPage({ onSelectAlgo }) {
       time: 'O(N²)',
       space: 'O(1)',
       stable: 'Unstable',
-      isActive: false
+      isActive: true
     },
     {
       id: 'insertion-sort',
@@ -45,7 +45,7 @@ export default function AlgorithmsPage({ onSelectAlgo }) {
       time: 'O(N²)',
       space: 'O(1)',
       stable: 'Stable',
-      isActive: false
+      isActive: true
     },
     {
       id: 'shell-sort',

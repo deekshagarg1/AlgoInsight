@@ -15,15 +15,15 @@ import { Copy, Terminal, Check } from 'lucide-react';
  * @param {Object} props
  * @param {number[]} props.highlightedLines - Lines executing in this step
  */
-export default function CodePanel({ highlightedLines = [] }) {
+export default function CodePanel({ highlightedLines = [], isLoopFalse = false, codeData = {} }) {
   const [language, setLanguage] = React.useState('java');
   const [copied, setCopied] = React.useState(false);
   const scrollContainerRef = React.useRef(null);
 
-  const codeData = BUBBLE_SORT_CODE[language] || BUBBLE_SORT_CODE.java;
+  const activeCode = (codeData && codeData[language]) || BUBBLE_SORT_CODE[language] || BUBBLE_SORT_CODE.java;
 
   const handleCopy = () => {
-    const rawCodeText = codeData.map(line => line.text).join('\n');
+    const rawCodeText = activeCode.map(line => line.text).join('\n');
     navigator.clipboard.writeText(rawCodeText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -201,11 +201,21 @@ export default function CodePanel({ highlightedLines = [] }) {
       >
         {/* min-w-max prevents horizontal cutoff of highlighted line backgrounds */}
         <div className="min-w-max pr-6">
-          {codeData.map((line) => {
+          {activeCode.map((line) => {
             const isHighlighted = highlightedLines.includes(line.num);
-            const style = isHighlighted 
-              ? getLineHighlightStyle(line.num, language)
-              : { bg: '', border: 'border-l-[3px] border-transparent', numberColor: 'text-[#6272a4]' };
+            let style = { bg: '', border: 'border-l-[3px] border-transparent', numberColor: 'text-[#6272a4]' };
+            
+            if (isHighlighted) {
+              if (isLoopFalse) {
+                style = {
+                  bg: 'bg-red-500/10',
+                  border: 'border-l-[3px] border-[#ff5555]',
+                  numberColor: 'text-[#ff5555] font-bold'
+                };
+              } else {
+                style = getLineHighlightStyle(line.num, language);
+              }
+            }
 
             return (
               <div

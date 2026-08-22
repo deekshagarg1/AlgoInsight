@@ -100,8 +100,22 @@ export function generateBubbleSortSteps(originalArray) {
           explanation: `Step: ${arr[j].value} <= ${arr[j + 1].value} → no swap needed.`,
           operationText: `${arr[j].value} <= ${arr[j + 1].value} → no swap`
         });
-      }
     }
+  }
+
+  // Inner loop condition became false step
+  steps.push({
+      array: [...arr],
+      type: STEP_TYPES.HIGHLIGHT,
+      indices: [],
+      sortedIndices: [...sortedIndices],
+      highlightedLines: [7],
+      isLoopFalse: true,
+      pass: currentPassNum,
+      swapped: swapped,
+      explanation: `Inner loop check: j (${n - i - 1}) < n - 1 - i (${n - i - 1}) is false. Inner loop terminates.`,
+      operationText: `j < n - 1 - i is false`
+    });
 
     // Pass completion, mark element as sorted
     sortedIndices.push(n - i - 1);
@@ -134,6 +148,20 @@ export function generateBubbleSortSteps(originalArray) {
       break;
     }
   }
+
+  // Outer loop condition became false step
+  steps.push({
+    array: [...arr],
+    type: STEP_TYPES.HIGHLIGHT,
+    indices: [],
+    sortedIndices: [...sortedIndices],
+    highlightedLines: [4],
+    isLoopFalse: true,
+    pass: steps[steps.length - 1] ? steps[steps.length - 1].pass : n - 1,
+    swapped: steps[steps.length - 1] ? steps[steps.length - 1].swapped : false,
+    explanation: `Outer loop check: i (${n - 1}) < n - 1 (${n - 1}) is false. Outer loop terminates.`,
+    operationText: `i < n - 1 is false`
+  });
 
   // Final complete sorted state
   const finalSorted = Array.from({ length: n }, (_, idx) => idx);

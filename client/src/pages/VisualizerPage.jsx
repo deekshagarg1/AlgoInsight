@@ -1,10 +1,15 @@
 import React from 'react';
 import { generateBubbleSortSteps } from '../engine/algorithms/bubbleSort';
+import { generateSelectionSortSteps } from '../engine/algorithms/selectionSort';
+import { generateInsertionSortSteps } from '../engine/algorithms/insertionSort';
 import BarVisualizer from '../components/BarVisualizer';
 import PlaybackControls from '../components/PlaybackControls';
 import VisualizerInput from '../components/VisualizerInput';
 import CodePanel from '../components/CodePanel';
 import { Bookmark } from 'lucide-react';
+import { BUBBLE_SORT_CODE } from '../data/bubbleSortCode';
+import { SELECTION_SORT_CODE } from '../data/selectionSortCode';
+import { INSERTION_SORT_CODE } from '../data/insertionSortCode';
 
 /**
  * VisualizerPage Component (High Fidelity Workspace)
@@ -14,7 +19,7 @@ import { Bookmark } from 'lucide-react';
  * - Right panel: Dataset Input panel + Visualizer Canvas + Details Card
  * - Footer panel: Timeline player deck
  */
-export default function VisualizerPage() {
+export default function VisualizerPage({ selectedAlgoId = 'bubble-sort' }) {
   const [array, setArray] = React.useState([64, 34, 25, 12, 22, 11, 90]);
   const [steps, setSteps] = React.useState([]);
   const [currentStepIndex, setCurrentStepIndex] = React.useState(0);
@@ -24,13 +29,34 @@ export default function VisualizerPage() {
 
   const containerRef = React.useRef(null);
 
-  // Recalculate steps whenever array changes
+  // Dynamic algorithm routing map
+  const algoMeta = {
+    'bubble-sort': {
+      name: 'Bubble Sort',
+      engine: generateBubbleSortSteps,
+      code: BUBBLE_SORT_CODE
+    },
+    'selection-sort': {
+      name: 'Selection Sort',
+      engine: generateSelectionSortSteps,
+      code: SELECTION_SORT_CODE
+    },
+    'insertion-sort': {
+      name: 'Insertion Sort',
+      engine: generateInsertionSortSteps,
+      code: INSERTION_SORT_CODE
+    }
+  };
+
+  const currentAlgo = algoMeta[selectedAlgoId] || algoMeta['bubble-sort'];
+
+  // Recalculate steps whenever array or selectedAlgoId changes
   React.useEffect(() => {
-    const generatedSteps = generateBubbleSortSteps(array);
+    const generatedSteps = currentAlgo.engine(array);
     setSteps(generatedSteps);
     setCurrentStepIndex(0);
     setIsPlaying(false);
-  }, [array]);
+  }, [array, selectedAlgoId]);
 
   // Playback timer loop
   React.useEffect(() => {
@@ -126,7 +152,7 @@ export default function VisualizerPage() {
       {/* Top Header Deck */}
       <div className="flex justify-between items-center w-full border-b border-[#20212b]/40 pb-2.5 mb-1">
         <h1 className="text-lg sm:text-xl font-bold text-slate-200 tracking-tight m-0 font-sans">
-          Bubble Sort
+          {currentAlgo.name}
         </h1>
         <button className="px-3.5 py-1.5 rounded-xl bg-[#161720] border border-slate-800 text-[11px] font-semibold text-slate-350 hover:text-white flex items-center gap-1.5 cursor-pointer transition-all active:scale-95">
           <Bookmark className="w-3.5 h-3.5 text-cyan-400" />
@@ -139,7 +165,11 @@ export default function VisualizerPage() {
         
         {/* Left Column: CodePanel */}
         <div className="lg:col-span-5 h-full">
-          <CodePanel highlightedLines={currentStep.highlightedLines} />
+          <CodePanel 
+            highlightedLines={currentStep.highlightedLines} 
+            isLoopFalse={currentStep.isLoopFalse} 
+            codeData={currentAlgo.code} 
+          />
         </div>
 
         {/* Right Column: Visualizer Canvas + Inputs */}
@@ -160,6 +190,11 @@ export default function VisualizerPage() {
             pass={currentStep.pass}
             swapped={currentStep.swapped}
             operationText={currentStep.operationText}
+            minIdx={currentStep.minIdx !== undefined ? currentStep.minIdx : -1}
+            algoId={selectedAlgoId}
+            i={currentStep.i !== undefined ? currentStep.i : -1}
+            j={currentStep.j !== undefined ? currentStep.j : -1}
+            keyValue={currentStep.keyValue !== undefined ? currentStep.keyValue : -1}
           />
 
           {/* Bottom Step explanation banner with left solid emerald line indicator */}
