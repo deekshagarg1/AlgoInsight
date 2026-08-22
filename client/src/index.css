@@ -1,20 +1,21 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --bg-primary: #0b0f19;
-    --bg-secondary: #111827;
-    --bg-tertiary: #1f2937;
-    --accent-blue: #3b82f6;
-    --accent-cyan: #06b6d4;
-    --accent-purple: #8b5cf6;
-    --accent-emerald: #10b981;
-    --accent-amber: #f59e0b;
-    --accent-rose: #f43f5e;
-  }
+@theme {
+  --color-slate-950: #030303;
+  --color-slate-900: #0b0b0d;
+  --color-slate-800: #18181b;
+  --color-slate-700: #27272a;
+  
+  --color-indigo-500: #0d9488;
+  --color-indigo-600: #0f766e;
+  --color-indigo-400: #14b8a6;
+  --color-indigo-300: #2dd4bf;
+  --color-indigo-955: #042f2e;
+}
 
+@layer base {
   body {
-    background-color: #0b0f19;
+    background-color: #030303;
     color: #f3f4f6;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     margin: 0;
@@ -22,22 +23,123 @@
     overflow-x: hidden;
   }
 
-  /* Custom sleek scrollbar */
+  /* Direct overrides for arbitrary compiled tailwind hex colors */
+  .bg-\[\#161720\] {
+    background-color: #0b0b0d !important;
+  }
+  .bg-\[\#161720\]\/45 {
+    background-color: rgba(11, 11, 13, 0.45) !important;
+  }
+  .bg-\[\#1c1d27\]\/40 {
+    background-color: rgba(16, 16, 19, 0.4) !important;
+  }
+  .bg-\[\#1a1b24\]\/40 {
+    background-color: rgba(16, 16, 19, 0.4) !important;
+  }
+  .bg-\[\#1e1f29\] {
+    background-color: #0b0b0d !important;
+  }
+  .bg-\[\#21222c\] {
+    background-color: #101013 !important;
+  }
+  .bg-\[\#21222c\]\/50 {
+    background-color: rgba(16, 16, 19, 0.5) !important;
+  }
+  .bg-\[\#21222c\]\/20 {
+    background-color: rgba(16, 16, 19, 0.2) !important;
+  }
+  .bg-\[\#21222c\]\/40 {
+    background-color: rgba(16, 16, 19, 0.4) !important;
+  }
+  
+  .border-\[\#20212b\] {
+    border-color: #18181b !important;
+  }
+  .border-\[\#20212b\]\/40 {
+    border-color: rgba(24, 24, 27, 0.4) !important;
+  }
+  .border-\[\#20212b\]\/50 {
+    border-color: rgba(24, 24, 27, 0.5) !important;
+  }
+  .border-\[\#20212b\]\/60 {
+    border-color: rgba(24, 24, 27, 0.6) !important;
+  }
+  .border-\[\#20212b\]\/75 {
+    border-color: rgba(24, 24, 27, 0.75) !important;
+  }
+  .border-\[\#20212b\]\/80 {
+    border-color: rgba(24, 24, 27, 0.8) !important;
+  }
+
+  /* Webkit custom scrollbars styling */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    background: #0f172a;
+    background: #030303;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #334155;
+    background: #18181b;
     border-radius: 9999px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #475569;
+    background: #27272a;
+  }
+
+  /* ==========================================================================
+     Vercel / Linear High-End Software Styling Luxury Refinements
+     ========================================================================== */
+
+  /* Smooth cubic-bezier transitions override for scaling, borders, and shadows */
+  .transition-all {
+    transition: all 350ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  /* Premium glowing card borders on hover */
+  .hover\:border-cyan-500\/35:hover {
+    border-color: rgba(20, 184, 166, 0.35) !important;
+    box-shadow: 0 0 35px rgba(20, 184, 166, 0.08) !important;
+    transform: translateY(-2px);
+  }
+
+  .hover\:border-slate-700\/80:hover {
+    border-color: rgba(20, 184, 166, 0.25) !important;
+    box-shadow: 0 0 35px rgba(20, 184, 166, 0.06) !important;
+    transform: translateY(-1px) scale(1.003);
+  }
+
+  /* Dynamic micro-glow for badges and headers */
+  .text-cyan-455 {
+    color: #2dd4bf !important;
+    text-shadow: 0 0 10px rgba(45, 212, 191, 0.2);
+  }
+
+  /* CodePanel Highlight Line Glow indicators overlay */
+  .bg-yellow-500\/10 {
+    background-color: rgba(20, 184, 166, 0.08) !important;
+    border-left: 3px solid #2dd4bf !important;
+    box-shadow: inset 4px 0 10px rgba(20, 184, 166, 0.05);
+  }
+
+  .bg-emerald-500\/10 {
+    background-color: rgba(16, 185, 129, 0.08) !important;
+    border-left: 3px solid #10b981 !important;
+    box-shadow: inset 4px 0 10px rgba(16, 185, 129, 0.05);
+  }
+
+  .bg-pink-500\/10 {
+    background-color: rgba(244, 63, 94, 0.08) !important;
+    border-left: 3px solid #f43f5e !important;
+    box-shadow: inset 4px 0 10px rgba(244, 63, 94, 0.05);
+  }
+
+  .bg-\[\#44475a\]\/75 {
+    background-color: rgba(20, 184, 166, 0.07) !important;
+    border-left: 3px solid #0d9488 !important;
+    box-shadow: inset 4px 0 10px rgba(20, 184, 166, 0.05);
   }
 }
