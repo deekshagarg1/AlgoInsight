@@ -4,7 +4,14 @@ client/*.log
 client/npm-debug.log*
 
 # Dependencies
-client/node_modules
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Local env files
+.env
+.env.local
+server/.env
 
 # Production
 client/dist
