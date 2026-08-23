@@ -5,11 +5,34 @@ import AlgorithmsPage from './pages/AlgorithmsPage';
 import VisualizerPage from './pages/VisualizerPage';
 import CoursesPage from './pages/CoursesPage';
 import PracticePage from './pages/PracticePage';
+import DashboardPage from './pages/DashboardPage';
+import AuthModal from './components/AuthModal';
+import { AuthContext } from './context/AuthContext';
 import { BookOpen, LayoutDashboard, BrainCircuit } from 'lucide-react';
 
 function App() {
+  const { syncProgress } = React.useContext(AuthContext);
   const [activeTab, setActiveTab] = React.useState('home');
   const [selectedAlgoId, setSelectedAlgoId] = React.useState('bubble-sort');
+  const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false);
+
+  const handleAuthSuccess = async () => {
+    try {
+      const completionsStr = localStorage.getItem('algoinsight_course_completions');
+      const completions = completionsStr ? JSON.parse(completionsStr) : {};
+
+      const highScoresStr = localStorage.getItem('algoinsight_high_scores');
+      const highScores = highScoresStr ? JSON.parse(highScoresStr) : {};
+
+      const streakStr = localStorage.getItem('algoinsight_streak');
+      const streak = streakStr ? Number(streakStr) : 0;
+
+      await syncProgress(completions, highScores, streak);
+      setActiveTab('dashboard');
+    } catch (error) {
+      console.error('Failed to sync progress:', error);
+    }
+  };
 
   // Sync state from URL Hash (supports back/forward browser buttons)
   React.useEffect(() => {
@@ -81,13 +104,10 @@ function App() {
         return <PracticePage />;
       case 'dashboard':
         return (
-          <div className="flex flex-col items-center justify-center text-center py-20 bg-slate-900/40 border border-slate-800 rounded-3xl p-8 max-w-2xl mx-auto">
-            <LayoutDashboard className="w-12 h-12 text-amber-400 mb-4 animate-bounce" />
-            <h2 className="text-xl font-bold text-slate-200">User Learning Dashboard — Coming Soon</h2>
-            <p className="text-sm text-slate-400 mt-2 max-w-md">
-              View your percentage completed courses, bookmarks, and quiz stats.
-            </p>
-          </div>
+          <DashboardPage 
+            onOpenAuth={() => setIsAuthModalOpen(true)} 
+            onExplore={(tabId) => setActiveTab(tabId)}
+          />
         );
       default:
         return null;
@@ -97,12 +117,23 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
       {/* Navigation */}
-      <Navbar activeTab={activeTab} onChangeTab={setActiveTab} />
+      <Navbar 
+        activeTab={activeTab} 
+        onChangeTab={setActiveTab} 
+        onOpenAuth={() => setIsAuthModalOpen(true)} 
+      />
 
       {/* Main Responsive Container */}
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-10 flex flex-col justify-center">
         {renderContent()}
       </main>
+
+      {/* Login & Signup Modal Overlay */}
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+        onSuccess={handleAuthSuccess} 
+      />
 
       {/* Footer (Premium Glassmorphic Footer) */}
       {activeTab !== 'home' && activeTab !== 'visualizer' && (

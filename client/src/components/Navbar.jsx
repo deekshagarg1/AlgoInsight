@@ -1,5 +1,6 @@
 import React from 'react';
-import { Activity, BookOpen, LayoutDashboard, BrainCircuit, Menu, X } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
+import { Activity, BookOpen, LayoutDashboard, BrainCircuit, Menu, X, LogOut, User as UserIcon } from 'lucide-react';
 
 /**
  * Navbar Component with interactive tab toggling support
@@ -8,7 +9,8 @@ import { Activity, BookOpen, LayoutDashboard, BrainCircuit, Menu, X } from 'luci
  * @param {string} props.activeTab - Currently active tab ('home', 'algorithms', etc.)
  * @param {Function} props.onChangeTab - Callback to toggle tab views
  */
-export default function Navbar({ activeTab, onChangeTab }) {
+export default function Navbar({ activeTab, onChangeTab, onOpenAuth }) {
+  const { user, logout } = React.useContext(AuthContext);
   const [isOpen, setIsOpen] = React.useState(false);
 
   const navLinks = [
@@ -65,13 +67,29 @@ export default function Navbar({ activeTab, onChangeTab }) {
               </button>
             ))}
             
-            {/* Call to Action Button */}
-            <button 
-              onClick={() => handleLinkClick('algorithms')}
-              className="ml-4 px-4 py-2 text-xs font-semibold text-slate-950 bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 rounded-lg shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer border-none"
-            >
-              Get Started
-            </button>
+            {/* User Profile / Auth Actions */}
+            {user ? (
+              <div className="flex items-center gap-3 ml-4">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-slate-350">
+                  <UserIcon className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>{user.name.split(' ')[0]}</span>
+                </div>
+                <button 
+                  onClick={logout}
+                  className="px-3.5 py-1.5 text-xs font-semibold text-slate-350 hover:text-rose-455 bg-transparent border border-[#27272a]/40 hover:border-rose-900/35 rounded-lg transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1"
+                >
+                  <LogOut className="w-3.5 h-3.5 text-rose-400" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={onOpenAuth}
+                className="ml-4 px-4 py-2 text-xs font-semibold text-slate-950 bg-gradient-to-r from-cyan-400 to-indigo-500 rounded-lg shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer border-none font-bold"
+              >
+                Sign In
+              </button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -101,13 +119,35 @@ export default function Navbar({ activeTab, onChangeTab }) {
               {link.name}
             </button>
           ))}
-          <div className="pt-2 px-3">
-            <button 
-              onClick={() => handleLinkClick('algorithms')}
-              className="w-full py-2.5 text-center text-sm font-semibold text-slate-950 bg-gradient-to-r from-cyan-400 to-teal-400 rounded-lg shadow-lg"
-            >
-              Get Started
-            </button>
+          <div className="pt-3 px-3 border-t border-slate-800/60 mt-2 flex flex-col gap-2">
+            {user ? (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-sm font-mono font-bold text-slate-300">
+                  <UserIcon className="w-4 h-4 text-cyan-400" />
+                  <span>Logged in as: {user.name}</span>
+                </div>
+                <button 
+                  onClick={() => {
+                    logout();
+                    setIsOpen(false);
+                  }}
+                  className="w-full py-2.5 text-center text-sm font-semibold text-rose-400 bg-rose-955/20 border border-rose-900/30 rounded-lg cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={() => {
+                  onOpenAuth();
+                  setIsOpen(false);
+                }}
+                className="w-full py-2.5 text-center text-sm font-semibold text-slate-950 bg-gradient-to-r from-cyan-400 to-indigo-500 rounded-lg shadow-lg cursor-pointer font-bold"
+              >
+                Sign In
+              </button>
+            )}
           </div>
         </div>
       )}

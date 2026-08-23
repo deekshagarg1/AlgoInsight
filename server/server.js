@@ -24,9 +24,11 @@ app.get('/', (req, res) => {
 // Routes
 const healthRouter = require('./routes/health');
 const algorithmsRouter = require('./routes/algorithms');
+const authRouter = require('./routes/auth');
 
 app.use('/api', healthRouter);
 app.use('/api/algorithms', algorithmsRouter);
+app.use('/api/auth', authRouter);
 
 // Port configuration
 const PORT = process.env.PORT || 5000;
