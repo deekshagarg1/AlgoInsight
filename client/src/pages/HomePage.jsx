@@ -1,5 +1,5 @@
 import React from 'react';
-import { Terminal, Cpu, Award, ArrowRight, Code, Server, Database, Layers, Sparkles, CheckCircle2, Flame, Shuffle, StepForward, BrainCircuit, ChevronRight } from 'lucide-react';
+import { Terminal, Cpu, Award, ArrowRight, Code, Server, Database, Layers, Sparkles, CheckCircle2, Flame, Shuffle, StepForward, BrainCircuit, ChevronRight, BookOpen } from 'lucide-react';
 
 /**
  * HomePage Component (High Fidelity - Impressive & Interactive)
@@ -179,30 +179,30 @@ export default function HomePage({ onExplore }) {
       {/* 4. ALGORITHM PREVIEW CATALOG */}
       <section className="py-12 max-w-5xl mx-auto w-full px-4 border-t border-slate-900 relative z-10">
         <div className="flex flex-col gap-3 mb-8 text-center md:text-left">
-          <span className="text-[10px] font-bold text-indigo-400 tracking-widest uppercase">Simulator Workspace</span>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-200 tracking-tight m-0">Algorithms Catalog</h2>
+          <span className="text-[10px] font-bold text-indigo-400 tracking-widest uppercase">Interactive Labs</span>
+          <h2 className="text-xl sm:text-2xl font-black text-slate-200 tracking-tight m-0">Algorithms Workspace</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
           
-          {/* Card 1: Bubble Sort Showcase (Genuinely Interactive Miniature Simulator!) */}
-          <div className="p-6 rounded-2xl bg-[#161720] border border-slate-800 hover:border-cyan-500/35 transition-all duration-300 hover:shadow-[0_0_30px_rgba(6,182,212,0.06)] relative group flex flex-col justify-between">
-            <div className="absolute top-4 right-4 bg-cyan-400/10 text-cyan-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-cyan-400/20">
-              Active Module
+          {/* Card 1: Bubble Sort Showcase (Interactive Simulator!) */}
+          <div className="p-5 rounded-2xl bg-[#161720] border border-slate-800 hover:border-cyan-500/35 transition-all duration-300 hover:shadow-[0_0_30px_rgba(6,182,212,0.06)] relative group flex flex-col justify-between">
+            <div className="absolute top-4 right-4 bg-cyan-400/10 text-cyan-400 text-[9px] font-bold px-2.5 py-0.5 rounded-full border border-cyan-400/20">
+              Interactive Live
             </div>
 
             <div>
-              <div className="w-10 h-10 rounded-xl bg-cyan-950/40 border border-cyan-800/60 flex items-center justify-center text-cyan-455 mb-4">
-                <Layers className="w-5 h-5" />
+              <div className="w-9 h-9 rounded-xl bg-cyan-950/40 border border-cyan-800/60 flex items-center justify-center text-cyan-455 mb-4">
+                <Layers className="w-4.5 h-4.5" />
               </div>
-              <h3 className="text-lg font-bold text-slate-100">Bubble Sort Visualizer</h3>
-              <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                Sort elements by comparing adjacent items and swapping them if they are in the wrong order. Features Z-axis arched slide jumps, dynamic line highlighting, and early-swap breaks.
+              <h3 className="text-sm font-bold text-slate-100">Bubble Sort Visualizer</h3>
+              <p className="mt-2 text-[11px] text-slate-400 leading-relaxed">
+                Compare adjacent elements and swap them if unordered. Features Z-axis arched animations, pointer labels, and sorted boundary highlights.
               </p>
 
               {/* Genuinely Interactive miniature visualizer mock container */}
-              <div className="mt-4 bg-[#111219] rounded-xl border border-slate-900 p-3.5 flex flex-col gap-3">
-                <div className="flex justify-between items-center text-[9px] font-mono text-slate-500">
+              <div className="mt-4 bg-[#111219] rounded-xl border border-slate-900 p-3 flex flex-col gap-2.5">
+                <div className="flex justify-between items-center text-[8px] font-mono text-slate-500">
                   <span>Pass = {miniPass}</span>
                   <span className={miniSwapped ? "text-yellow-400 font-bold" : "text-slate-500"}>
                     Swapped = {miniSwapped ? "true" : "false"}
@@ -210,7 +210,7 @@ export default function HomePage({ onExplore }) {
                 </div>
                 
                 {/* Dynamic Height Bars representing mini sorting array */}
-                <div className="h-14 flex items-end justify-center gap-2 border-b border-slate-900 pb-1">
+                <div className="h-12 flex items-end justify-center gap-1.5 border-b border-slate-900 pb-1">
                   {miniArray.map((value, idx) => {
                     const isComparing = activeCompare.includes(idx);
                     const isSorted = idx >= miniArray.length - miniPass + 1;
@@ -225,7 +225,7 @@ export default function HomePage({ onExplore }) {
                     return (
                       <div
                         key={idx}
-                        className={`w-5 rounded transition-all duration-300 ${barClass}`}
+                        className={`w-4.5 rounded transition-all duration-300 ${barClass}`}
                         style={{ height: `${value}%` }}
                       ></div>
                     );
@@ -233,14 +233,14 @@ export default function HomePage({ onExplore }) {
                 </div>
 
                 {/* Dynamic index / pointer circles */}
-                <div className="flex justify-center gap-2 text-[8px] font-bold font-mono text-slate-500 h-3">
+                <div className="flex justify-center gap-1.5 text-[8px] font-bold font-mono text-slate-500 h-2.5">
                   {miniArray.map((_, idx) => {
                     const isJ = idx === miniJ;
                     const isJP1 = idx === miniJ + 1;
 
-                    if (isJ) return <span key={idx} className="text-cyan-400 font-bold w-5 text-center">j</span>;
-                    if (isJP1) return <span key={idx} className="text-yellow-400 font-bold w-5 text-center">j+1</span>;
-                    return <span key={idx} className="w-5 text-center">{idx}</span>;
+                    if (isJ) return <span key={idx} className="text-cyan-400 font-bold w-4.5 text-center">j</span>;
+                    if (isJP1) return <span key={idx} className="text-yellow-400 font-bold w-4.5 text-center">j+1</span>;
+                    return <span key={idx} className="w-4.5 text-center">{idx}</span>;
                   })}
                 </div>
 
@@ -269,7 +269,7 @@ export default function HomePage({ onExplore }) {
             </div>
 
             <button
-              onClick={onExplore}
+              onClick={() => onExplore('algorithms')}
               className="mt-5 w-full py-2.5 font-bold text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded-xl transition-all cursor-pointer border-none text-[11px] uppercase tracking-wider flex items-center justify-center gap-1.5"
             >
               Test Bubble Sort Live
@@ -277,33 +277,134 @@ export default function HomePage({ onExplore }) {
             </button>
           </div>
 
-          {/* Card 2: Upcoming catalog list placeholder */}
-          <div className="p-6 rounded-2xl bg-[#161720]/45 border border-slate-900 hover:border-slate-800/80 transition-all duration-300 flex flex-col justify-between h-[410px] opacity-70">
+          {/* Card 2: Merge Sort Showcase */}
+          <div className="p-5 rounded-2xl bg-[#161720] border border-slate-800 hover:border-indigo-500/35 transition-all duration-300 hover:shadow-[0_0_30px_rgba(99,102,241,0.06)] relative group flex flex-col justify-between">
+            <div className="absolute top-4 right-4 bg-indigo-400/10 text-indigo-400 text-[9px] font-bold px-2.5 py-0.5 rounded-full border border-indigo-400/20">
+              O(N log N) Stable
+            </div>
+
             <div>
-              <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-850 flex items-center justify-center text-slate-500 mb-4">
-                <Sparkles className="w-5 h-5" />
+              <div className="w-9 h-9 rounded-xl bg-indigo-950/40 border border-indigo-800/60 flex items-center justify-center text-indigo-400 mb-4">
+                <Cpu className="w-4.5 h-4.5" />
               </div>
-              <h3 className="text-lg font-bold text-slate-350">Upcoming Simulators</h3>
-              <p className="mt-2 text-xs text-slate-500 leading-relaxed">
-                We are actively integrating selection sort, insertion sort, quick sort, and binary search engines. These will be added to this catalogue page with full code trace layers.
+              <h3 className="text-sm font-bold text-slate-100">Merge Sort Visualizer</h3>
+              <p className="mt-2 text-[11px] text-slate-400 leading-relaxed">
+                Visualize divide-and-conquer recursion tree frames. Features temporary array buffer grids, sub-array bounds tracking, and color-coded pointer sorting phases.
               </p>
 
-              <div className="mt-6 flex flex-col gap-2.5">
-                <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-slate-700" /> Selection Sort (Engine Drafted)
+              <div className="mt-4 bg-[#111219] rounded-xl border border-slate-900 p-3.5 flex flex-col gap-2.5">
+                <div className="flex justify-between items-center text-[8px] font-mono text-slate-500">
+                  <span>Complexity: O(N log N)</span>
+                  <span className="text-indigo-400 font-bold">Dividing Phase</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-slate-700" /> Insertion Sort (Under Review)
-                </div>
-                <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-slate-700" /> Binary Search Visualizer
+                
+                <div className="flex flex-col gap-1.5 py-2.5 border-y border-slate-900/60">
+                  <div className="flex justify-center gap-1.5 text-[8.5px] font-mono">
+                    <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-450">[24, 76]</span>
+                    <span className="px-1.5 py-0.5 rounded bg-indigo-900/25 border border-indigo-800/30 text-indigo-300 font-bold">[15, 43]</span>
+                  </div>
+                  <div className="text-[7.5px] font-mono text-center text-slate-500">Temp buffer tracks recursively sorted subsets</div>
                 </div>
               </div>
             </div>
 
-            <div className="text-center text-[10px] text-slate-500 font-semibold font-mono border border-dashed border-slate-800/60 py-2 rounded-xl mt-6">
-              IN INTEGRATION PIPELINE
+            <button
+              onClick={() => onExplore('algorithms')}
+              className="mt-5 w-full py-2.5 font-bold text-slate-955 bg-indigo-500 hover:bg-indigo-400 rounded-xl transition-all cursor-pointer border-none text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5"
+            >
+              Test Merge Sort
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Card 3: Counting Sort Showcase */}
+          <div className="p-5 rounded-2xl bg-[#161720] border border-slate-800 hover:border-emerald-500/35 transition-all duration-300 hover:shadow-[0_0_30px_rgba(16,185,129,0.06)] relative group flex flex-col justify-between">
+            <div className="absolute top-4 right-4 bg-emerald-400/10 text-emerald-450 text-[9px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-400/20">
+              O(N + K) Linear
             </div>
+
+            <div>
+              <div className="w-9 h-9 rounded-xl bg-emerald-950/40 border border-emerald-800/60 flex items-center justify-center text-emerald-455 mb-4">
+                <Database className="w-4.5 h-4.5" />
+              </div>
+              <h3 className="text-sm font-bold text-slate-100">Counting Sort Visualizer</h3>
+              <p className="mt-2 text-[11px] text-slate-400 leading-relaxed">
+                Witness non-comparison hashing keys in real time. Features a multi-row visual workspace (Original, Counts Accumulator, and Output lists) with interactive offset writes.
+              </p>
+
+              <div className="mt-4 bg-[#111219] rounded-xl border border-slate-900 p-3.5 flex flex-col gap-2.5">
+                <div className="flex justify-between items-center text-[8px] font-mono text-slate-500">
+                  <span>Space: O(N + K)</span>
+                  <span className="text-emerald-450 font-bold">Stable Bucket writes</span>
+                </div>
+                
+                <div className="flex items-center justify-center gap-1 border-y border-slate-900/60 py-2">
+                  <div className="w-5 h-5 rounded bg-emerald-950/20 border border-emerald-800/30 text-[8px] font-mono font-bold text-emerald-350 flex items-center justify-center">0</div>
+                  <div className="w-5 h-5 rounded bg-slate-900 border border-slate-800 text-[8px] font-mono text-slate-500 flex items-center justify-center">1</div>
+                  <div className="w-5 h-5 rounded bg-[#101013] border border-slate-850 text-[8px] font-mono text-slate-500 flex items-center justify-center">2</div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => onExplore('algorithms')}
+              className="mt-5 w-full py-2.5 font-bold text-slate-955 bg-emerald-450 hover:bg-emerald-400 rounded-xl transition-all cursor-pointer border-none text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5"
+            >
+              Test Counting Sort
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 4.5 INTEGRATED PORTAL MODULES (NEW FEATURES ALIGNED WITH THEME) */}
+      <section className="py-12 max-w-5xl mx-auto w-full px-4 border-t border-slate-900 relative z-10">
+        <div className="flex flex-col gap-3 mb-8 text-center md:text-left">
+          <span className="text-[10px] font-bold text-indigo-400 tracking-widest uppercase">Learning Portals</span>
+          <h2 className="text-xl sm:text-2xl font-black text-slate-200 tracking-tight m-0">Interactive Academic Modules</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+          
+          {/* Module 1: Structured Lessons */}
+          <div className="p-6 rounded-3xl bg-gradient-to-br from-[#161720] to-[#111219] border border-slate-800/60 hover:border-cyan-500/25 transition-all duration-300 hover:shadow-[0_0_35px_rgba(6,182,212,0.04)] flex flex-col justify-between">
+            <div className="flex flex-col gap-3">
+              <div className="w-10 h-10 rounded-xl bg-cyan-950/40 border border-cyan-855/50 flex items-center justify-center text-cyan-400">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-bold text-slate-100 m-0">Interactive Concept Courses</h3>
+              <p className="text-xs text-slate-400 leading-relaxed mt-1">
+                Read structured, rich concept cheatsheets covering visual algorithm complexity bounds, LIFO stack operations, circular queue array pointers, and duplicate stability conditions. Check off completed checkpoints as you learn!
+              </p>
+            </div>
+            <button
+              onClick={() => onExplore('courses')}
+              className="mt-6 py-3 w-full bg-[#18181b] hover:bg-[#27272a] text-slate-250 hover:text-white border border-[#27272a]/45 hover:border-slate-700 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center justify-center gap-1.5"
+            >
+              Open Concept Courses
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Module 2: MCQ Quizzes */}
+          <div className="p-6 rounded-3xl bg-gradient-to-br from-[#161720] to-[#111219] border border-slate-800/60 hover:border-indigo-500/25 transition-all duration-300 hover:shadow-[0_0_35px_rgba(99,102,241,0.04)] flex flex-col justify-between">
+            <div className="flex flex-col gap-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-950/40 border border-indigo-855/50 flex items-center justify-center text-indigo-400">
+                <Award className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-bold text-slate-100 m-0">Interactive Practice & Streaks</h3>
+              <p className="text-xs text-slate-400 leading-relaxed mt-1">
+                Challenge your theoretical memory with dynamic multiple-choice quiz sets. Tracks your score sheets, displays visual success checklists, and unlocks orange learning flame streaks on perfect 5/5 scorecards.
+              </p>
+            </div>
+            <button
+              onClick={() => onExplore('practice')}
+              className="mt-6 py-3 w-full bg-indigo-500 hover:bg-indigo-400 text-slate-950 font-bold rounded-xl text-xs cursor-pointer transition-all border-none flex items-center justify-center gap-1.5"
+            >
+              Start Practice Quiz
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
 
         </div>
