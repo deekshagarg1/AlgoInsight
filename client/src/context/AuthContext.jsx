@@ -1,8 +1,10 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { ToastContext } from './ToastContext';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const { addToast } = React.useContext(ToastContext);
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('algoinsight_auth_token'));
   const [loading, setLoading] = useState(true);
@@ -43,46 +45,58 @@ export const AuthProvider = ({ children }) => {
 
   // Signup
   const signup = async (name, email, password) => {
-    const res = await fetch('http://localhost:5000/api/auth/signup', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ name, email, password })
-    });
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name, email, password })
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      throw new Error(data.message || 'Signup failed');
+      if (!res.ok) {
+        throw new Error(data.message || 'Signup failed');
+      }
+
+      localStorage.setItem('algoinsight_auth_token', data.token);
+      setToken(data.token);
+      setUser(data.user);
+      addToast(`Profile created successfully! Welcome, ${data.user.name}! 🎉`, 'success');
+      return data.user;
+    } catch (err) {
+      addToast(err.message || 'Registration failed.', 'error');
+      throw err;
     }
-
-    localStorage.setItem('algoinsight_auth_token', data.token);
-    setToken(data.token);
-    setUser(data.user);
-    return data.user;
   };
 
   // Login
   const login = async (email, password) => {
-    const res = await fetch('http://localhost:5000/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email, password })
-    });
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      throw new Error(data.message || 'Login failed');
+      if (!res.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      localStorage.setItem('algoinsight_auth_token', data.token);
+      setToken(data.token);
+      setUser(data.user);
+      addToast(`Welcome back, ${data.user.name}! 🚀`, 'success');
+      return data.user;
+    } catch (err) {
+      addToast(err.message || 'Login failed. Please check credentials.', 'error');
+      throw err;
     }
-
-    localStorage.setItem('algoinsight_auth_token', data.token);
-    setToken(data.token);
-    setUser(data.user);
-    return data.user;
   };
 
   // Logout
@@ -90,6 +104,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('algoinsight_auth_token');
     setToken(null);
     setUser(null);
+    addToast('Logged out successfully. See you next time! 👋', 'success');
   };
 
   // Sync progress
@@ -109,10 +124,12 @@ export const AuthProvider = ({ children }) => {
       if (res.ok) {
         const updatedUser = await res.json();
         setUser(updatedUser);
+        addToast('Learning progress synced to cloud account! 💾', 'success');
         return updatedUser;
       }
     } catch (error) {
       console.error('Failed to sync progress:', error);
+      addToast('Cloud progress sync failed.', 'error');
     }
   };
 

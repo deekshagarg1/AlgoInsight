@@ -447,26 +447,26 @@ export default function BarVisualizer({
               temp
             </span>
 
-            {/* Temp Array columns */}
-            <div className="flex items-center gap-2 select-none h-11">
+            {/* Temp Array columns (Sized larger for clearer visualization) */}
+            <div className="flex items-center gap-2.5 select-none h-24">
               {tempArray.map((item, tIdx) => {
-                // Determine height/scale for visual comparison
-                const tempHeightPercent = maxValue > 0 ? (item.value / maxValue) * 55 : 0;
+                // Determine height/scale for visual comparison (increased to 75% for better visibility)
+                const tempHeightPercent = maxValue > 0 ? (item.value / maxValue) * 75 : 0;
 
                 return (
                   <motion.div
                     key={`temp-${item.id}`}
                     layoutId={`temp-item-${item.id}`}
-                    className="w-7 h-full flex flex-col justify-end items-center relative"
+                    className="w-8.5 h-full flex flex-col justify-end items-center relative"
                   >
                     {/* Tiny value text */}
-                    <span className="text-[8px] font-mono font-bold text-slate-400 mb-0.5">
+                    <span className="text-[9px] font-mono font-bold text-slate-350 mb-1">
                       {item.value}
                     </span>
 
                     {/* Compact bar outline */}
                     <div 
-                      className="w-full bg-[#161720] border-[1.5px] border-cyan-500/50 rounded-md shadow-[0_0_6px_rgba(6,182,212,0.15)]"
+                      className="w-full bg-[#161720] border-[1.5px] border-indigo-500/65 rounded-md shadow-[0_0_8px_rgba(99,102,241,0.2)]"
                       style={{ height: `${tempHeightPercent}%` }}
                     />
                   </motion.div>
