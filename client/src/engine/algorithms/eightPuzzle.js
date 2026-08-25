@@ -205,7 +205,7 @@ export function generateEightPuzzleSteps(originalArray) {
       type: isLastStep ? STEP_TYPES.SORTED : (pIdx === 0 ? STEP_TYPES.INITIAL : STEP_TYPES.COMPARE),
       indices: [], // empty for grid
       sortedIndices: sortedIndices,
-      highlightedLines: isLastStep ? [12] : [10, 11],
+      highlightedLines: isLastStep ? [24, 25] : (pIdx === 0 ? [18, 19, 20, 21] : [22, 23, 24, 29, 30, 31, 32]),
       i: node.board.indexOf(0), // empty index
       j: pIdx > 0 ? path[pIdx - 1].board.indexOf(0) : -1, // previous empty index to show swap
       minIdx: -1,
