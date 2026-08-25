@@ -36,8 +36,13 @@ export default function VisualizerInput({
   }, [array]);
 
   const isCountingSort = selectedAlgoId === 'counting-sort';
+  const isEightPuzzle = selectedAlgoId === 'eight-puzzle';
 
-  const presets = isCountingSort ? [
+  const presets = isEightPuzzle ? [
+    { id: 'STANDARD', label: 'Scramble (Easy)', data: [1, 2, 3, 0, 4, 6, 7, 5, 8] },
+    { id: 'EASY', label: 'Scramble (Very Easy)', data: [1, 2, 3, 4, 0, 6, 7, 5, 8] },
+    { id: 'MEDIUM', label: 'Scramble (Medium)', data: [1, 3, 4, 8, 6, 2, 7, 0, 5] }
+  ] : isCountingSort ? [
     { id: 'STANDARD', label: 'Standard', data: [4, 2, 2, 8, 3, 3, 1] },
     { id: 'SMALL', label: 'Small', data: [3, 1, 4, 1, 5] },
     { id: 'REVERSE', label: 'Reverse Sorted', data: [9, 8, 6, 4, 3, 2, 1] },
@@ -66,23 +71,42 @@ export default function VisualizerInput({
     if (disabled) return;
 
     const rawItems = customText.split(',').map((val) => val.trim());
-    const numbers = rawItems.map((val) => Number(val)).filter((val) => !isNaN(val) && val > 0);
+    const numbers = rawItems.map((val) => Number(val)).filter((val) => !isNaN(val));
 
     if (numbers.length !== rawItems.length) {
-      setError('Invalid entries. Input positive numbers only.');
+      setError('Invalid entries. Input valid numbers only.');
       return;
     }
 
-    if (numbers.length < 4 || numbers.length > 12) {
-      setError('Keep array length between 4 and 12 for high fidelity visual scale.');
-      return;
-    }
+    if (isEightPuzzle) {
+      if (numbers.length !== 9) {
+        setError('8-Puzzle board must contain exactly 9 numbers representing the 3x3 grid.');
+        return;
+      }
+      const uniqueSet = new Set(numbers);
+      const isValidSet = numbers.every(n => n >= 0 && n <= 8) && uniqueSet.size === 9;
+      if (!isValidSet) {
+        setError('Must contain exactly numbers 0 to 8, with no duplicates (0 is the empty slot).');
+        return;
+      }
+    } else {
+      if (numbers.length < 4 || numbers.length > 12) {
+        setError('Keep array length between 4 and 12 for high fidelity visual scale.');
+        return;
+      }
 
-    const maxLimit = isCountingSort ? 9 : 100;
-    const outOfBounds = numbers.some((n) => n > maxLimit || n < 1);
-    if (outOfBounds) {
-      setError(`Please input values between 1 and ${maxLimit} ${isCountingSort ? '(to fit count indexes on screen)' : ''}.`);
-      return;
+      const outOfBounds = numbers.some((n) => n < 1);
+      if (outOfBounds) {
+        setError('Positive numbers only.');
+        return;
+      }
+
+      const maxLimit = isCountingSort ? 9 : 100;
+      const exceedsMax = numbers.some((n) => n > maxLimit);
+      if (exceedsMax) {
+        setError(`Please input values between 1 and ${maxLimit} ${isCountingSort ? '(to fit count indexes on screen)' : ''}.`);
+        return;
+      }
     }
 
     setError('');
@@ -156,7 +180,7 @@ export default function VisualizerInput({
                   type="text"
                   value={customText}
                   onChange={(e) => setCustomText(e.target.value)}
-                  placeholder="e.g. 64, 34, 25, 12"
+                  placeholder={isEightPuzzle ? "e.g. 1, 2, 3, 0, 4, 6, 7, 5, 8" : "e.g. 64, 34, 25, 12"}
                   className="flex-1 bg-[#1a1b24] border border-[#2c2d3a] rounded-xl px-3 py-2 text-xs font-mono text-cyan-300 focus:outline-none focus:border-cyan-500/40"
                 />
                 <button 
@@ -176,7 +200,7 @@ export default function VisualizerInput({
           ) : (
             /* Array Formatted String view (Clean custom monospace styling) */
             <div className="w-full bg-[#1c1d27]/40 border border-[#20212b]/50 rounded-xl p-3.5 flex items-center font-mono text-xs select-all shadow-inner">
-              <span className="text-[#6272a4] pr-2">arr =</span>
+              <span className="text-[#6272a4] pr-2">{isEightPuzzle ? 'board =' : 'arr ='}</span>
               <span className="text-[#8be9fd] font-bold">
                 [{array.join(', ')}]
               </span>

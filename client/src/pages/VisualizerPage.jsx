@@ -6,7 +6,9 @@ import { generateMergeSortSteps } from '../engine/algorithms/mergeSort';
 import { generateCountingSortSteps } from '../engine/algorithms/countingSort';
 import { generateLinearSearchSteps } from '../engine/algorithms/linearSearch';
 import { generateBinarySearchSteps } from '../engine/algorithms/binarySearch';
+import { generateEightPuzzleSteps } from '../engine/algorithms/eightPuzzle';
 import BarVisualizer from '../components/BarVisualizer';
+import GridVisualizer from '../components/GridVisualizer';
 import PlaybackControls from '../components/PlaybackControls';
 import VisualizerInput from '../components/VisualizerInput';
 import CodePanel from '../components/CodePanel';
@@ -97,6 +99,11 @@ export default function VisualizerPage({ selectedAlgoId = 'bubble-sort' }) {
       name: 'Binary Search',
       engine: generateBinarySearchSteps,
       code: { java: [], cpp: [], python: [] }
+    },
+    'eight-puzzle': {
+      name: '8-Puzzle Solver',
+      engine: generateEightPuzzleSteps,
+      code: { java: [], cpp: [], python: [] }
     }
   };
 
@@ -112,6 +119,8 @@ export default function VisualizerPage({ selectedAlgoId = 'bubble-sort' }) {
     } else if (selectedAlgoId === 'binary-search') {
       setArray([11, 12, 22, 25, 34, 64, 90]);
       setTarget(25);
+    } else if (selectedAlgoId === 'eight-puzzle') {
+      setArray([1, 2, 3, 0, 4, 6, 7, 5, 8]); // default solvable scrambled state
     } else {
       setArray([64, 34, 25, 12, 22, 11, 90]);
     }
@@ -258,32 +267,43 @@ export default function VisualizerPage({ selectedAlgoId = 'bubble-sort' }) {
             onTargetChange={setTarget}
           />
 
-          {/* Bar Visual Canvas */}
-          <BarVisualizer
-            array={currentStep.array}
-            stepType={currentStep.type}
-            activeIndices={currentStep.indices}
-            sortedIndices={currentStep.sortedIndices}
-            pass={currentStep.pass}
-            swapped={currentStep.type === 'SORTED' || currentStep.swapped}
-            operationText={currentStep.operationText}
-            minIdx={currentStep.minIdx !== undefined ? currentStep.minIdx : -1}
-            algoId={selectedAlgoId}
-            i={currentStep.i !== undefined ? currentStep.i : -1}
-            j={currentStep.j !== undefined ? currentStep.j : -1}
-            keyValue={selectedAlgoId === 'linear-search' || selectedAlgoId === 'binary-search' ? target : (currentStep.keyValue !== undefined ? currentStep.keyValue : -1)}
-            tempArray={currentStep.tempArray || []}
-            depth={currentStep.depth || 0}
-            leftRange={currentStep.leftRange || []}
-            rightRange={currentStep.rightRange || []}
-            countArray={currentStep.countArray || []}
-            outputArray={currentStep.outputArray || []}
-            phase={currentStep.phase || ''}
-            valuesRange={currentStep.valuesRange || []}
-            activeArrIdx={currentStep.activeArrIdx !== undefined ? currentStep.activeArrIdx : -1}
-            activeCountIdx={currentStep.activeCountIdx !== undefined ? currentStep.activeCountIdx : -1}
-            activeOutputIdx={currentStep.activeOutputIdx !== undefined ? currentStep.activeOutputIdx : -1}
-          />
+          {/* Conditionally Swap Bar or Grid Visual Canvas */}
+          {selectedAlgoId === 'eight-puzzle' ? (
+            <GridVisualizer
+              array={currentStep.array}
+              sortedIndices={currentStep.sortedIndices}
+              i={currentStep.i !== undefined ? currentStep.i : -1}
+              j={currentStep.j !== undefined ? currentStep.j : -1}
+              operationText={currentStep.operationText}
+              explanation={currentStep.explanation}
+            />
+          ) : (
+            <BarVisualizer
+              array={currentStep.array}
+              stepType={currentStep.type}
+              activeIndices={currentStep.indices}
+              sortedIndices={currentStep.sortedIndices}
+              pass={currentStep.pass}
+              swapped={currentStep.type === 'SORTED' || currentStep.swapped}
+              operationText={currentStep.operationText}
+              minIdx={currentStep.minIdx !== undefined ? currentStep.minIdx : -1}
+              algoId={selectedAlgoId}
+              i={currentStep.i !== undefined ? currentStep.i : -1}
+              j={currentStep.j !== undefined ? currentStep.j : -1}
+              keyValue={selectedAlgoId === 'linear-search' || selectedAlgoId === 'binary-search' ? target : (currentStep.keyValue !== undefined ? currentStep.keyValue : -1)}
+              tempArray={currentStep.tempArray || []}
+              depth={currentStep.depth || 0}
+              leftRange={currentStep.leftRange || []}
+              rightRange={currentStep.rightRange || []}
+              countArray={currentStep.countArray || []}
+              outputArray={currentStep.outputArray || []}
+              phase={currentStep.phase || ''}
+              valuesRange={currentStep.valuesRange || []}
+              activeArrIdx={currentStep.activeArrIdx !== undefined ? currentStep.activeArrIdx : -1}
+              activeCountIdx={currentStep.activeCountIdx !== undefined ? currentStep.activeCountIdx : -1}
+              activeOutputIdx={currentStep.activeOutputIdx !== undefined ? currentStep.activeOutputIdx : -1}
+            />
+          )}
 
           {/* Bottom Step explanation banner with left solid emerald line indicator */}
           <div className="w-full bg-slate-950 border border-slate-900 rounded-xl p-4 flex items-center gap-3 relative shadow-inner overflow-hidden mt-2">

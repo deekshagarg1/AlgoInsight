@@ -87,6 +87,7 @@ function App() {
               setSelectedAlgoId(id);
               setActiveTab('visualizer');
             }} 
+            onOpenAuth={() => setIsAuthModalOpen(true)}
           />
         );
       case 'visualizer':
@@ -98,10 +99,11 @@ function App() {
               setSelectedAlgoId(id);
               setActiveTab('visualizer');
             }} 
+            onOpenAuth={() => setIsAuthModalOpen(true)}
           />
         );
       case 'practice':
-        return <PracticePage />;
+        return <PracticePage onOpenAuth={() => setIsAuthModalOpen(true)} />;
       case 'dashboard':
         return (
           <DashboardPage 

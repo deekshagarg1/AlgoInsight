@@ -1,5 +1,6 @@
 import React from 'react';
 import { Bookmark, Sparkles, Lock, Layers, Search } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 
 /**
  * AlgorithmsPage Component (High Fidelity - Card Cheatsheets)
@@ -12,7 +13,8 @@ import { Bookmark, Sparkles, Lock, Layers, Search } from 'lucide-react';
  * @param {Object} props
  * @param {Function} props.onSelectAlgo - Callback to open the visualizer page for an algorithm
  */
-export default function AlgorithmsPage({ onSelectAlgo }) {
+export default function AlgorithmsPage({ onSelectAlgo, onOpenAuth }) {
+  const { user } = React.useContext(AuthContext);
   const sortingAlgorithms = [
     {
       id: 'bubble-sort',
@@ -96,15 +98,36 @@ export default function AlgorithmsPage({ onSelectAlgo }) {
     }
   ];
 
+  const aiAlgorithms = [
+    {
+      id: 'eight-puzzle',
+      name: '8-Puzzle Solver',
+      desc: 'Sliding tile board solver displaying Manhattan heuristics and A* search tree expansions.',
+      difficulty: 'Hard',
+      difficultyColor: 'text-rose-450 bg-rose-950/20 border-rose-500/25',
+      time: 'O(b^d)',
+      space: 'O(b^d)',
+      stable: 'A* Search',
+      isActive: true
+    }
+  ];
+
   const renderAlgoGrid = (algos) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {algos.map((algo) => {
+        const isLocked = !user && algo.id !== 'bubble-sort' && algo.id !== 'selection-sort';
         return (
           <div
             key={algo.id}
-            onClick={() => algo.isActive && onSelectAlgo(algo.id)}
+            onClick={() => {
+              if (isLocked) {
+                onOpenAuth();
+              } else if (algo.isActive) {
+                onSelectAlgo(algo.id);
+              }
+            }}
             className={`p-5 rounded-2xl border transition-all duration-300 relative group flex flex-col justify-between min-h-[150px] ${
-              algo.isActive
+              algo.isActive || isLocked
                 ? 'bg-[#161720] border-slate-800 hover:border-cyan-500/35 hover:shadow-[0_0_20px_rgba(6,182,212,0.04)] cursor-pointer shadow-lg hover:-translate-y-0.5'
                 : 'bg-[#161720]/45 border-slate-900/60 text-slate-500 cursor-not-allowed opacity-60'
             }`}
@@ -165,11 +188,13 @@ export default function AlgorithmsPage({ onSelectAlgo }) {
               </span>
             </div>
 
-            {/* Lock icon overlay for coming soon algorithms */}
-            {!algo.isActive && (
+            {/* Lock icon overlay for locked/coming soon algorithms */}
+            {(!algo.isActive || isLocked) && (
               <div className="absolute inset-0 bg-[#0c0d12]/35 backdrop-blur-[0.5px] rounded-2xl flex flex-col items-center justify-center gap-1.5 z-20">
                 <Lock className="w-4 h-4 text-slate-600" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Coming Soon</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                  {!algo.isActive ? 'Coming Soon' : 'Login Required'}
+                </span>
               </div>
             )}
           </div>
@@ -218,6 +243,19 @@ export default function AlgorithmsPage({ onSelectAlgo }) {
 
         {/* Algorithm Cards Grid */}
         {renderAlgoGrid(searchingAlgorithms)}
+      </div>
+
+      {/* AI & Grid Search section header */}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-2 border-b border-slate-900 pb-2 pl-1">
+          <Sparkles className="w-4 h-4 text-[#ffa116]" />
+          <h2 className="text-base font-bold tracking-tight text-slate-200 m-0">
+            AI & Grid Search Algorithms
+          </h2>
+        </div>
+
+        {/* Algorithm Cards Grid */}
+        {renderAlgoGrid(aiAlgorithms)}
       </div>
 
     </div>

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Brain, Trophy, ChevronRight, ArrowLeft, Check, X, HelpCircle, RefreshCw, Flame, Award } from 'lucide-react';
+import { Brain, Trophy, ChevronRight, ArrowLeft, Check, X, HelpCircle, RefreshCw, Flame, Award, Sparkles, Lock } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 
 const QUIZ_CATEGORIES = [
   {
@@ -43,6 +44,70 @@ const QUIZ_CATEGORIES = [
         options: ["O(N log N)", "O(N)", "O(2^N)", "O(log N)"],
         correctIdx: 3,
         explanation: "O(log N) represents a logarithmic curve, which grows extremely slowly compared to linear O(N), log-linear O(N log N), or exponential O(2^N)."
+      }
+    ]
+  },
+  {
+    id: 'searching',
+    title: 'Searching Traces',
+    desc: 'Test your understanding of Sequential Scans, bounds narrowing, and log-halving checks.',
+    iconColor: 'text-amber-400',
+    color: 'from-amber-500/10 via-amber-500/5 to-transparent border-amber-500/15',
+    questions: [
+      {
+        id: 'search-1',
+        q: "For a sorted array of size 8, what is the maximum number of comparisons needed to locate or verify any target element using Binary Search?",
+        options: ["3 comparisons", "4 comparisons", "8 comparisons", "1 comparison"],
+        correctIdx: 1,
+        explanation: "In the worst case, Binary Search divides the range of size N in half repeatedly. The maximum comparisons is calculated as: floor(log2(N)) + 1. For N=8, log2(8)=3, plus 1 yields at most 4 comparisons."
+      },
+      {
+        id: 'search-2',
+        q: "What is the consequence of running Binary Search on an unsorted array?",
+        options: [
+          "The search always crashes with a memory segmentation fault",
+          "The search works correctly but runs in slower O(N) time",
+          "The search may fail to find elements that exist in the array",
+          "The array is automatically sorted in the background"
+        ],
+        correctIdx: 2,
+        explanation: "Because Binary Search relies on order to determine whether to ignore the left or right half, an unsorted array violates this logic, causing it to discard the wrong half and fail to locate existing elements."
+      },
+      {
+        id: 'search-3',
+        q: "In Binary Search, if target = 15, arr[mid] = 20, and the array is sorted in ascending order, how are the bounds updated?",
+        options: [
+          "low = mid + 1",
+          "high = mid - 1",
+          "high = mid",
+          "low = mid"
+        ],
+        correctIdx: 1,
+        explanation: "Since the middle element (20) is greater than the target (15), the target must lie in the left half of the ascending sorted array. Thus, we update the right bound: high = mid - 1."
+      },
+      {
+        id: 'search-4',
+        q: "What is the average-case time complexity of searching for an element in an unsorted array of size N?",
+        options: [
+          "O(1)",
+          "O(log N)",
+          "O(N)",
+          "O(N log N)"
+        ],
+        correctIdx: 2,
+        explanation: "Because the array is unsorted, we cannot perform Binary Search. We must perform a Linear Search scan, which has an average-case runtime of O(N)."
+      },
+      {
+        id: 'search-5',
+        q: "In Binary Search, how is the index 'mid' calculated to avoid integer overflow in languages like C++ or Java?",
+        options: [
+          "mid = (low + high) / 2",
+          "mid = low + (high - low) / 2",
+          "mid = high - (high + low) / 2",
+          "mid = (low + high) >> 2"
+        ],
+        correctIdx: 1,
+        explanation: "Writing mid = low + (high - low)/2 mathematically yields the same result as (low + high)/2 but prevents integer overflow if the sum of low and high exceeds the maximum integer limit."
       }
     ]
   },
@@ -104,7 +169,7 @@ const QUIZ_CATEGORIES = [
           "prev.next = newNode; newNode.next = prev.next;",
           "newNode.next = prev.next; prev.next = newNode;",
           "newNode.next = prev; prev.next = newNode.next;",
-          "prev.next = newNode.next; newNode.next = prev;"
+          "prev.next = newNode.next; newNode.next = prev."
         ],
         correctIdx: 1,
         explanation: "To prevent losing the rest of the list, newNode must point to the successor node first (newNode.next = prev.next). Once linked, prev can point to newNode (prev.next = newNode)."
@@ -141,14 +206,16 @@ const QUIZ_CATEGORIES = [
   }
 ];
 
-export default function PracticePage() {
+export default function PracticePage({ onOpenAuth }) {
+  const { user } = React.useContext(AuthContext);
   const [activeCategory, setActiveCategory] = React.useState(null);
   const [currentQuestionIdx, setCurrentQuestionIdx] = React.useState(0);
   const [selectedOption, setSelectedOption] = React.useState(null);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = React.useState(false);
   const [correctAnswersCount, setCorrectAnswersCount] = React.useState(0);
   const [quizCompleted, setQuizCompleted] = React.useState(false);
-  
+  const [showConfetti, setShowConfetti] = React.useState(false);
+
   // High scores tracking inside LocalStorage
   const [highScores, setHighScores] = React.useState(() => {
     try {
@@ -170,20 +237,28 @@ export default function PracticePage() {
   });
 
   const handleSelectCategory = (catId) => {
+    if (!user) {
+      onOpenAuth();
+      return;
+    }
     setActiveCategory(catId);
     setCurrentQuestionIdx(0);
     setSelectedOption(null);
     setIsAnswerSubmitted(false);
     setCorrectAnswersCount(0);
     setQuizCompleted(false);
+    setShowConfetti(false);
   };
 
   const handleSubmitAnswer = (correctIdx) => {
     if (selectedOption === null || isAnswerSubmitted) return;
     
     setIsAnswerSubmitted(true);
-    if (selectedOption === correctIdx) {
+    const correct = selectedOption === correctIdx;
+    if (correct) {
       setCorrectAnswersCount(prev => prev + 1);
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 2000);
     }
   };
 
@@ -196,22 +271,23 @@ export default function PracticePage() {
       setQuizCompleted(true);
       
       // Update High Scores
+      const finalScore = correctAnswersCount + (selectedOption === QUIZ_CATEGORIES.find(c => c.id === activeCategory).questions[currentQuestionIdx].correctIdx ? 1 : 0);
       setHighScores(prev => {
         const currentHighScore = prev[activeCategory] || 0;
-        const newHighScore = Math.max(currentHighScore, correctAnswersCount + (selectedOption === QUIZ_CATEGORIES.find(c => c.id === activeCategory).questions[currentQuestionIdx].correctIdx ? 1 : 0));
+        const newHighScore = Math.max(currentHighScore, finalScore);
         const updated = { ...prev, [activeCategory]: newHighScore };
         localStorage.setItem('algoinsight_high_scores', JSON.stringify(updated));
         return updated;
       });
 
       // Increment Streak if score is perfect
-      const finalScore = correctAnswersCount + (selectedOption === QUIZ_CATEGORIES.find(c => c.id === activeCategory).questions[currentQuestionIdx].correctIdx ? 1 : 0);
       if (finalScore === totalQuestions) {
         setStreak(prev => {
           const newStreak = prev + 1;
           localStorage.setItem('algoinsight_streak', newStreak.toString());
           return newStreak;
         });
+        setShowConfetti(true);
       }
     }
   };
@@ -228,17 +304,55 @@ export default function PracticePage() {
       
       return (
         <div className="w-full flex flex-col gap-6 text-left max-w-2xl mx-auto py-6 relative min-h-[400px] justify-center items-center">
-          <div className="w-full bg-[#161720] border border-slate-800 rounded-3xl p-8 flex flex-col items-center text-center shadow-2xl relative overflow-hidden">
+          {/* Confetti Animation keyframes */}
+          <style>{`
+            @keyframes confetti-fall {
+              0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+              80% { opacity: 1; }
+              100% { transform: translateY(450px) rotate(360deg); opacity: 0; }
+            }
+          `}</style>
+
+          {/* Confetti Explosion Layer */}
+          {showConfetti && (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden z-50">
+              {Array.from({ length: 45 }).map((_, idx) => {
+                const randomLeft = Math.random() * 100;
+                const randomDelay = Math.random() * 1.2;
+                const randomDuration = 1.4 + Math.random() * 1.4;
+                const randomColor = ['#ffa116', '#10b981', '#3b82f6', '#ec4899', '#8b5cf6'][Math.floor(Math.random() * 5)];
+                const randomSize = 6 + Math.random() * 8;
+                return (
+                  <div
+                    key={idx}
+                    className="absolute animate-[confetti-fall_2.5s_linear_infinite]"
+                    style={{
+                      left: `${randomLeft}%`,
+                      width: `${randomSize}px`,
+                      height: `${randomSize}px`,
+                      backgroundColor: randomColor,
+                      borderRadius: idx % 2 === 0 ? '50%' : '0%',
+                      animationDelay: `${randomDelay}s`,
+                      animationDuration: `${randomDuration}s`,
+                      top: '-20px'
+                    }}
+                  />
+                );
+              })}
+            </div>
+          )}
+
+          <div className="w-full bg-[#282828] border border-slate-800 rounded-3xl p-8 flex flex-col items-center text-center shadow-2xl relative overflow-hidden">
             {/* Glow header details */}
-            <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-indigo-500/25 to-transparent"></div>
+            <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#ffa116]/25 to-transparent"></div>
             
             <Trophy className={`w-14 h-14 mb-4 ${isPerfect ? 'text-amber-400 animate-bounce' : 'text-slate-400'}`} />
             
-            <span className="text-[10px] font-bold font-mono tracking-widest text-[#6272a4] uppercase">Quiz Complete</span>
+            <span className="text-[10px] font-bold font-mono tracking-widest text-[#ffa116] uppercase">Quiz Complete</span>
             <h2 className="text-xl font-black text-slate-200 mt-1">
               {isPerfect ? 'Perfect Score!' : 'Well Played!'}
             </h2>
-            <p className="text-xs text-slate-400 mt-1 max-w-xs leading-relaxed">
+            <p className="text-xs text-slate-450 mt-1 max-w-xs leading-relaxed">
               {isPerfect 
                 ? 'Excellent! You have mastered this concept and extended your streak!' 
                 : 'Great effort! Read the lesson explanations to clean up mistakes.'}
@@ -249,7 +363,7 @@ export default function PracticePage() {
                 <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-widest">Score</span>
                 <span className="text-xl font-black font-mono text-slate-200 mt-0.5">{correctAnswersCount} / {totalQuestions}</span>
               </div>
-              <div className="h-8 w-[1px] bg-slate-800"></div>
+              <div className="h-8 w-[1px] bg-slate-850"></div>
               <div className="flex flex-col">
                 <span className="text-[9px] font-mono font-bold text-slate-500 uppercase tracking-widest">Accuracy</span>
                 <span className="text-xl font-black font-mono text-slate-200 mt-0.5">{percentage}%</span>
@@ -259,14 +373,14 @@ export default function PracticePage() {
             <div className="flex gap-3 w-full mt-8">
               <button
                 onClick={() => handleSelectCategory(activeCategory)}
-                className="flex-1 py-3 bg-[#1c1d27] hover:bg-[#20212b] border border-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-bold cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                className="flex-1 py-3 bg-[#1a1a1a] hover:bg-[#202020] border border-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-bold cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-1.5"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 Try Again
               </button>
               <button
                 onClick={() => setActiveCategory(null)}
-                className="flex-1 py-3 bg-indigo-500 hover:bg-indigo-400 text-slate-950 rounded-xl text-xs font-bold cursor-pointer active:scale-95 transition-all border-none font-sans"
+                className="flex-1 py-3 bg-[#ffa116] hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-bold cursor-pointer active:scale-95 transition-all border-none font-sans"
               >
                 Practice Dashboard
               </button>
@@ -278,17 +392,55 @@ export default function PracticePage() {
 
     return (
       <div className="w-full flex flex-col gap-5 text-left max-w-2xl mx-auto py-4 relative min-h-[460px]">
+        {/* Confetti Fall Keyframes */}
+        <style>{`
+          @keyframes confetti-fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translateY(450px) rotate(360deg); opacity: 0; }
+          }
+        `}</style>
+
+        {/* Confetti Explosion Layer */}
+        {showConfetti && (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-50">
+            {Array.from({ length: 25 }).map((_, idx) => {
+              const randomLeft = Math.random() * 100;
+              const randomDelay = Math.random() * 0.8;
+              const randomDuration = 1.2 + Math.random() * 1.2;
+              const randomColor = ['#ffa116', '#10b981', '#3b82f6', '#ec4899', '#8b5cf6'][Math.floor(Math.random() * 5)];
+              const randomSize = 6 + Math.random() * 6;
+              return (
+                <div
+                  key={idx}
+                  className="absolute animate-[confetti-fall_2s_linear_infinite]"
+                  style={{
+                    left: `${randomLeft}%`,
+                    width: `${randomSize}px`,
+                    height: `${randomSize}px`,
+                    backgroundColor: randomColor,
+                    borderRadius: idx % 2 === 0 ? '50%' : '0%',
+                    animationDelay: `${randomDelay}s`,
+                    animationDuration: `${randomDuration}s`,
+                    top: '-20px'
+                  }}
+                />
+              );
+            })}
+          </div>
+        )}
+
         {/* Active Quiz Header */}
-        <div className="flex justify-between items-center w-full border-b border-[#20212b]/40 pb-3 shrink-0">
+        <div className="flex justify-between items-center w-full border-b border-[#383838]/60 pb-3 shrink-0">
           <div className="flex items-center gap-3">
             <button 
               onClick={() => setActiveCategory(null)}
-              className="p-2 rounded-xl bg-[#161720] border border-slate-800 text-slate-400 hover:text-white cursor-pointer active:scale-95 transition-all"
+              className="p-2 rounded-xl bg-[#282828] border border-slate-800 text-slate-400 hover:text-white cursor-pointer active:scale-95 transition-all"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
             <div>
-              <span className="text-[10px] font-bold font-mono tracking-widest text-[#6272a4] uppercase">{category.title}</span>
+              <span className="text-[10px] font-bold font-mono tracking-widest text-[#ffa116] uppercase">{category.title}</span>
               <h1 className="text-sm font-bold text-slate-200 tracking-tight m-0 mt-0.5">
                 Question {currentQuestionIdx + 1} of {totalQuestions}
               </h1>
@@ -299,16 +451,16 @@ export default function PracticePage() {
         {/* Progress bar indicator */}
         <div className="w-full h-1 bg-slate-900 border border-slate-800/40 rounded-full overflow-hidden">
           <div 
-            className="h-full bg-indigo-400 rounded-full transition-all duration-300"
+            className="h-full bg-[#ffa116] rounded-full transition-all duration-300"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
 
         {/* Question Board Card */}
-        <div className="bg-[#161720] border border-slate-800 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
+        <div className="bg-[#282828] border border-slate-800 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
           
           <div className="flex gap-2">
-            <HelpCircle className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+            <HelpCircle className="w-4 h-4 text-[#ffa116] shrink-0 mt-0.5" />
             <p className="font-semibold text-sm text-slate-200 leading-relaxed">
               {question.q}
             </p>
@@ -320,10 +472,10 @@ export default function PracticePage() {
               const isSelected = selectedOption === oIdx;
               const isCorrect = oIdx === question.correctIdx;
               
-              let btnClasses = 'bg-[#1a1b24]/40 border-[#20212b]/60 text-slate-450 hover:border-slate-800 hover:text-slate-300';
+              let btnClasses = 'bg-[#1a1a1a]/40 border-slate-850 text-slate-450 hover:border-slate-800 hover:text-slate-300';
               
               if (isSelected) {
-                btnClasses = 'bg-indigo-500/10 border-indigo-500/40 text-indigo-300';
+                btnClasses = 'bg-amber-500/10 border-[#ffa116]/40 text-amber-400';
               }
 
               if (isAnswerSubmitted) {
@@ -347,43 +499,40 @@ export default function PracticePage() {
                 >
                   <span>{opt}</span>
                   {isAnswerSubmitted && isCorrect && <Check className="w-3.5 h-3.5 text-emerald-450 stroke-[3]" />}
-                  {isAnswerSubmitted && isSelected && !isCorrect && <X className="w-3.5 h-3.5 text-rose-450 stroke-[3]" />}
+                  {isAnswerSubmitted && isSelected && !isCorrect && <X className="w-3.5 h-3.5 text-rose-400 stroke-[3]" />}
                 </button>
               );
             })}
           </div>
 
-          {/* Explanation Text block (reveals on submit) */}
+          {/* Explanations block upon submission */}
           {isAnswerSubmitted && (
-            <div className={`p-4 rounded-xl border text-xs leading-relaxed mt-2 flex flex-col gap-1.5 animate-in slide-in-from-top-3 duration-200 ${
-              selectedOption === question.correctIdx
-                ? 'bg-emerald-500/10 border-emerald-500/15 text-emerald-400/90'
-                : 'bg-rose-500/10 border-rose-500/15 text-rose-400'
-            }`}>
-              <span className="font-extrabold uppercase font-mono text-[9px] tracking-wider">
-                {selectedOption === question.correctIdx ? 'Correct Answer!' : 'Explanation'}
-              </span>
+            <div className="p-3.5 rounded-xl border bg-[#1a1a1a]/40 border-slate-850 text-xs leading-relaxed text-slate-400 mt-2 flex flex-col gap-1">
+              <span className="font-extrabold uppercase font-mono text-[9px] text-[#ffa116] tracking-wider">Explanation</span>
               <span>{question.explanation}</span>
             </div>
           )}
 
-          {/* Action Trigger Buttons */}
-          <div className="flex justify-end mt-4">
+          {/* Submit/Next Trigger CTA button */}
+          <div className="flex justify-end gap-2.5 mt-3 border-t border-slate-900 pt-4">
             {!isAnswerSubmitted ? (
               <button
                 disabled={selectedOption === null}
                 onClick={() => handleSubmitAnswer(question.correctIdx)}
-                className="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-400 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-bold rounded-xl text-xs cursor-pointer active:scale-95 transition-all border-none flex items-center gap-1"
+                className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all border-none ${
+                  selectedOption === null 
+                    ? 'bg-[#1a1a1a] text-slate-600 cursor-not-allowed' 
+                    : 'bg-[#ffa116] hover:bg-amber-400 text-slate-950 cursor-pointer active:scale-95'
+                }`}
               >
                 Submit Answer
               </button>
             ) : (
               <button
                 onClick={() => handleNextQuestion(totalQuestions)}
-                className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs cursor-pointer active:scale-95 transition-all border-none flex items-center gap-1"
+                className="px-5 py-2.5 bg-slate-850 hover:bg-slate-800 text-slate-200 rounded-xl text-xs font-bold cursor-pointer active:scale-95 transition-all border border-slate-800"
               >
                 {currentQuestionIdx < totalQuestions - 1 ? 'Next Question' : 'Finish Quiz'}
-                <ChevronRight className="w-4 h-4 ml-0.5" />
               </button>
             )}
           </div>
@@ -396,66 +545,76 @@ export default function PracticePage() {
   return (
     <div className="w-full flex flex-col gap-6 text-left py-4 max-w-5xl mx-auto">
       
-      {/* 1. Practice Page Header Deck */}
-      <div className="p-5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      {/* 1. Header Hero Promo Card */}
+      <div className="p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-emerald-950/50 border border-emerald-800/40 text-emerald-400 rounded-xl">
+          <div className="p-2.5 bg-amber-950/20 border border-amber-800/40 text-[#ffa116] rounded-xl">
             <Brain className="w-5 h-5 animate-pulse" />
           </div>
           <div>
-            <h1 className="text-base sm:text-lg font-bold text-slate-200 tracking-tight m-0 font-sans">Practice Quizzes</h1>
-            <p className="text-[11px] text-slate-400 mt-0.5">Test your conceptual understanding of algorithms, pointer operations, and Big-O runtimes.</p>
+            <h1 className="text-base sm:text-lg font-bold text-slate-200 tracking-tight m-0 font-sans">Practice & Assessment</h1>
+            <p className="text-[11px] text-slate-400 mt-0.5">Answer interactive algorithm questions, set high scores, and expand your learning streak.</p>
           </div>
         </div>
 
-        {/* Learning Streak Tracker */}
-        <div className="flex items-center gap-2 bg-[#161720] border border-slate-800 px-3.5 py-2 rounded-xl shrink-0 self-end sm:self-auto shadow-inner">
-          <Flame className={`w-4.5 h-4.5 ${streak > 0 ? 'text-amber-500 animate-pulse' : 'text-slate-500'}`} />
-          <div className="flex flex-col text-[10px]">
-            <span className="text-slate-500 font-bold font-mono uppercase tracking-wider">Perfect Streak</span>
-            <span className="text-slate-350 font-bold font-mono">
-              <span className="text-slate-200 font-black">{streak}</span> Quiz{streak !== 1 ? 'zes' : ''}
-            </span>
+        {/* Learning Streak Indicators */}
+        <div className="flex items-center gap-4 shrink-0 self-end sm:self-auto">
+          {/* Flame indicator */}
+          <div className="flex items-center gap-2 bg-[#282828] border border-slate-800 px-3 py-1.5 rounded-xl shadow-inner">
+            <Flame className={`w-4 h-4 ${streak > 0 ? 'text-amber-500 animate-pulse fill-amber-500' : 'text-slate-500'}`} />
+            <div className="flex flex-col text-[10px]">
+              <span className="text-slate-500 font-bold font-mono uppercase tracking-wider">Streak</span>
+              <span className="text-slate-200 font-black font-mono">{streak} Days</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 2. Quiz Category Grid Listing */}
+      {/* 2. Practice Categories Cards List */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2 border-b border-slate-900 pb-2 pl-1">
-          <Award className="w-4 h-4 text-emerald-450" />
-          <h2 className="text-base font-bold tracking-tight text-slate-200 m-0">Challenge Topics</h2>
+          <Award className="w-4 h-4 text-[#ffa116]" />
+          <h2 className="text-base font-bold tracking-tight text-slate-200 m-0">Challenge Decks</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {QUIZ_CATEGORIES.map((cat) => {
             const highScore = highScores[cat.id] || 0;
-            const totalQ = cat.questions.length;
-            
+            const totalQuestions = cat.questions.length;
+            const completed = highScore === totalQuestions;
+
             return (
               <div
                 key={cat.id}
-                className={`rounded-2xl border bg-gradient-to-br p-5 flex flex-col justify-between min-h-[175px] shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.01] hover:border-slate-700/80 ${cat.color}`}
+                className={`p-5 rounded-2xl border bg-gradient-to-br transition-all duration-300 relative flex flex-col justify-between min-h-[160px] ${cat.color}`}
               >
-                {/* Topic info */}
-                <div className="flex flex-col gap-2">
-                  <div className="flex justify-between items-center w-full">
-                    <span className="px-2 py-0.5 rounded text-[9px] font-bold font-mono uppercase bg-slate-900/50 border border-slate-800 text-slate-450 tracking-wider">
-                      {totalQ} MCQ Questions
-                    </span>
-                    <span className="text-[10px] font-mono font-bold text-slate-500">High Score: {highScore} / {totalQ}</span>
+                <div className="flex justify-between items-start gap-4">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-bold text-slate-200 tracking-tight m-0">{cat.title}</h3>
+                      {completed && <Sparkles className="w-3.5 h-3.5 text-amber-400" />}
+                      {!user && <Lock className="w-3.5 h-3.5 text-slate-500 shrink-0" />}
+                    </div>
+                    <p className="text-[11px] text-slate-400 leading-relaxed pr-6 mt-0.5">
+                      {cat.desc}
+                    </p>
                   </div>
-                  <h3 className="text-sm font-bold text-slate-200 tracking-tight mt-1">{cat.title}</h3>
-                  <p className="text-[11px] text-slate-400 leading-relaxed mt-0.5">{cat.desc}</p>
                 </div>
 
-                {/* Launch action */}
-                <div className="mt-5 pt-3 border-t border-slate-900/60">
+                <div className="flex items-center justify-between gap-4 mt-5 pt-3 border-t border-slate-900/60 w-full">
+                  <div className="flex flex-col text-[10px] font-mono font-bold">
+                    <span className="text-slate-500 uppercase tracking-wider">Best Score</span>
+                    <span className="text-slate-350 mt-0.5">
+                      <span className="text-slate-200 font-black">{highScore}</span> / {totalQuestions} Correct
+                    </span>
+                  </div>
+
                   <button
                     onClick={() => handleSelectCategory(cat.id)}
-                    className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold rounded-xl cursor-pointer active:scale-95 transition-all border-none font-sans"
+                    className="px-4 py-2 bg-[#ffa116] hover:bg-amber-400 text-[#1a1a1a] rounded-xl text-xs font-bold cursor-pointer active:scale-95 transition-all flex items-center gap-1 border-none font-sans"
                   >
-                    Start Quiz
+                    <span>Start Quiz</span>
+                    {!user ? <Lock className="w-3 h-3 ml-0.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                   </button>
                 </div>
               </div>

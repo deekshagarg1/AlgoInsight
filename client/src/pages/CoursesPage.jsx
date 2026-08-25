@@ -1,5 +1,6 @@
 import React from 'react';
-import { BookOpen, CheckCircle, ArrowLeft, HelpCircle, Award, Sparkles, Check, X, Code } from 'lucide-react';
+import { BookOpen, CheckCircle, ArrowLeft, HelpCircle, Award, Sparkles, Check, X, Code, Flame, Lock } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 
 const COURSES_DATA = [
   {
@@ -95,6 +96,76 @@ To overcome the $O(N^2)$ limit of basic sorts, we use divide-and-conquer or non-
           ],
           answerIdx: 2,
           explanation: "Merge Sort requires an auxiliary array of size O(N) to store temporary values during the merge phase, making its space complexity linear."
+        }
+      }
+    ]
+  },
+  {
+    id: 'searching-algorithms',
+    title: 'Searching Algorithms',
+    desc: 'Master target discovery limits, sequential scanning, and logarithmic binary search space halving.',
+    duration: '20 mins',
+    difficulty: 'Easy',
+    color: 'from-amber-500/10 via-amber-500/5 to-transparent border-amber-500/15',
+    iconColor: 'text-amber-400',
+    lessons: [
+      {
+        id: 'linear-search-lesson',
+        title: '1. Sequential Scan (Linear Search)',
+        content: `### Linear Search: Sequential Discovery
+Linear Search is the most intuitive searching method. It starts at the beginning of the collection and checks each element one-by-one until it finds the target or reaches the end.
+
+#### Key Complexity Characteristics:
+- **Access/Search**: $O(N)$ — Must scan elements sequentially in the worst case.
+- **Best Case**: $O(1)$ — Target is the first element.
+- **Worst Case**: $O(N)$ — Target is at the end or not present at all.
+- **Space Complexity**: $O(1)$ auxiliary.
+
+#### Pre-conditions:
+No pre-conditions required. Works on unsorted, shuffled, or completely random datasets.`,
+        visualizeAlgo: 'linear-search',
+        quiz: {
+          question: "What is the worst-case time complexity of Linear Search?",
+          options: [
+            "O(1)",
+            "O(log N)",
+            "O(N)",
+            "O(N log N)"
+          ],
+          answerIdx: 2,
+          explanation: "In the worst case, the target element is at the very end of the array or not present, requiring the search to scan all N elements."
+        }
+      },
+      {
+        id: 'binary-search-lesson',
+        title: '2. Logarithmic Search (Binary Search)',
+        content: `### Binary Search: Divide & Conquer
+Binary Search is a highly efficient search method. It works by repeatedly dividing the search space in half.
+
+#### How it works:
+1. Compare the target value with the middle element.
+2. If they match, search is complete.
+3. If target is smaller than the middle, narrow the search space to the left half.
+4. If target is larger than the middle, narrow the search space to the right half.
+
+#### Performance Characteristics:
+- **Worst Case**: $O(\\log N)$ — Search space halves repeatedly until element is located.
+- **Best Case**: $O(1)$ — Target is the middle element checked in the first step.
+- **Space Complexity**: $O(1)$ auxiliary.
+
+#### Pre-conditions:
+**CRITICAL**: The dataset MUST be sorted. Running Binary Search on unsorted data leads to incorrect search bounds.`,
+        visualizeAlgo: 'binary-search',
+        quiz: {
+          question: "Which of the following pre-conditions is required for Binary Search to function correctly?",
+          options: [
+            "The elements must be positive integers",
+            "The elements must be stored in a linked list",
+            "The array must be sorted in ascending/descending order",
+            "The array size must be a power of two"
+          ],
+          answerIdx: 2,
+          explanation: "Binary Search relies on sorted elements to make bounding comparisons (determining whether to search left or right)."
         }
       }
     ]
@@ -241,9 +312,11 @@ $$\\text{Rear} = (\\text{Rear} + 1) \\% \\text{Capacity}$$`,
   }
 ];
 
-export default function CoursesPage({ onExploreAlgo }) {
+export default function CoursesPage({ onExploreAlgo, onOpenAuth }) {
+  const { user } = React.useContext(AuthContext);
   const [selectedCourse, setSelectedCourse] = React.useState(null);
   const [activeLessonIdx, setActiveLessonIdx] = React.useState(0);
+  const [showConfetti, setShowConfetti] = React.useState(false);
   
   // Track completed lessons in state initialized from localStorage
   const [completions, setCompletions] = React.useState(() => {
@@ -282,6 +355,11 @@ export default function CoursesPage({ onExploreAlgo }) {
       ...prev,
       [lessonId]: optionIdx === correctIdx ? 'correct' : 'wrong'
     }));
+
+    if (optionIdx === correctIdx) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 2500);
+    }
   };
 
   // Calculate course progress percentages
@@ -302,23 +380,62 @@ export default function CoursesPage({ onExploreAlgo }) {
     const isCompleted = !!completions[lesson.id];
     const userChoice = quizAnswers[lesson.id];
     const feedbackStatus = quizFeedback[lesson.id];
+    const isCourseCompleted = course.lessons.every(l => completions[l.id]);
 
     return (
       <div className="w-full flex flex-col gap-5 text-left max-w-5xl mx-auto py-2 relative min-h-[500px]">
+        {/* Native Confetti CSS Animation */}
+        <style>{`
+          @keyframes confetti-fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translateY(450px) rotate(360deg); opacity: 0; }
+          }
+        `}</style>
+
+        {/* Confetti Explosion Layer */}
+        {showConfetti && (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-50">
+            {Array.from({ length: 45 }).map((_, idx) => {
+              const randomLeft = Math.random() * 100;
+              const randomDelay = Math.random() * 1.2;
+              const randomDuration = 1.4 + Math.random() * 1.4;
+              const randomColor = ['#ffa116', '#10b981', '#3b82f6', '#ec4899', '#8b5cf6'][Math.floor(Math.random() * 5)];
+              const randomSize = 6 + Math.random() * 8;
+              return (
+                <div
+                  key={idx}
+                  className="absolute animate-[confetti-fall_2.5s_linear_infinite]"
+                  style={{
+                    left: `${randomLeft}%`,
+                    width: `${randomSize}px`,
+                    height: `${randomSize}px`,
+                    backgroundColor: randomColor,
+                    borderRadius: idx % 2 === 0 ? '50%' : '0%',
+                    animationDelay: `${randomDelay}s`,
+                    animationDuration: `${randomDuration}s`,
+                    top: '-20px'
+                  }}
+                />
+              );
+            })}
+          </div>
+        )}
+
         {/* Course Reader Header Deck */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#20212b]/40 pb-4 shrink-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#383838]/80 pb-4 shrink-0">
           <div className="flex items-center gap-3">
             <button 
               onClick={() => {
                 setSelectedCourse(null);
                 setActiveLessonIdx(0);
               }}
-              className="p-2 rounded-xl bg-[#161720] border border-slate-800 text-slate-400 hover:text-white cursor-pointer active:scale-95 transition-all"
+              className="p-2 rounded-xl bg-[#282828] border border-slate-800 text-slate-400 hover:text-white cursor-pointer active:scale-95 transition-all"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
             <div>
-              <span className="text-[10px] font-bold font-mono tracking-widest text-[#6272a4] uppercase">Course Reader</span>
+              <span className="text-[10px] font-bold font-mono tracking-widest text-[#ffa116] uppercase">Course Reader</span>
               <h1 className="text-base sm:text-lg font-bold text-slate-200 tracking-tight m-0 font-sans mt-0.5">
                 {course.title}
               </h1>
@@ -330,8 +447,8 @@ export default function CoursesPage({ onExploreAlgo }) {
               onClick={() => toggleLessonCompletion(lesson.id)}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 border ${
                 isCompleted
-                  ? 'bg-emerald-500/20 text-emerald-450 border-emerald-500/35 shadow-[0_0_8px_rgba(16,185,129,0.1)]'
-                  : 'bg-[#161720] text-slate-350 border-slate-800 hover:text-white'
+                  ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/35 shadow-[0_0_8px_rgba(16,185,129,0.1)]'
+                  : 'bg-[#282828] text-slate-350 border-slate-800 hover:text-white'
               }`}
             >
               {isCompleted ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : null}
@@ -340,11 +457,26 @@ export default function CoursesPage({ onExploreAlgo }) {
           </div>
         </div>
 
+        {/* Golden Certification Banner */}
+        {isCourseCompleted && (
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between gap-4 mt-1 transition-all duration-300">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-500/15 text-amber-400 rounded-xl animate-bounce">
+                <Award className="w-5 h-5 stroke-[2.5]" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-amber-400 uppercase tracking-widest">Course Master Certified</h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">Excellent! You have fully completed all lessons and quizzes for this module.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Dynamic Split Panel Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch min-h-[400px]">
           
           {/* LEFT COLUMN: Lesson Selector Sidebar */}
-          <div className="lg:col-span-4 bg-[#161720] border border-slate-800 rounded-2xl p-4 flex flex-col gap-3.5 h-fit lg:h-[450px] lg:overflow-y-auto">
+          <div className="lg:col-span-4 bg-[#282828] border border-slate-800 rounded-2xl p-4 flex flex-col gap-3.5 h-fit lg:h-[450px] lg:overflow-y-auto">
             <span className="text-[9px] font-mono font-bold tracking-widest text-slate-500 uppercase pb-1 border-b border-slate-900">Lessons Index</span>
             <div className="flex flex-col gap-1.5">
               {course.lessons.map((l, index) => {
@@ -356,13 +488,13 @@ export default function CoursesPage({ onExploreAlgo }) {
                     onClick={() => setActiveLessonIdx(index)}
                     className={`w-full px-3.5 py-2.5 rounded-xl border text-left text-xs font-medium cursor-pointer transition-all flex items-center justify-between gap-3 ${
                       isActive
-                        ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30'
-                        : 'bg-[#1a1b24]/40 hover:bg-[#1a1b24]/80 text-slate-400 border-[#20212b]/60'
+                        ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                        : 'bg-[#1a1a1a]/40 hover:bg-[#1a1a1a]/85 text-slate-400 border-[#383838]'
                     }`}
                   >
                     <span>{l.title}</span>
                     {completed && (
-                      <CheckCircle className="w-3.5 h-3.5 text-emerald-450 shrink-0 fill-emerald-950/20" />
+                      <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0 fill-emerald-950/20" />
                     )}
                   </button>
                 );
@@ -371,12 +503,12 @@ export default function CoursesPage({ onExploreAlgo }) {
           </div>
 
           {/* RIGHT COLUMN: Interactive Content Reader Panel */}
-          <div className="lg:col-span-8 bg-[#161720] border border-slate-800 rounded-2xl flex flex-col overflow-hidden h-[450px]">
+          <div className="lg:col-span-8 bg-[#282828] border border-slate-800 rounded-2xl flex flex-col overflow-hidden h-[450px]">
             {/* Scrollable Document */}
             <div className="flex-1 overflow-y-auto p-5 sm:p-6 flex flex-col gap-5 text-slate-300 leading-relaxed text-sm select-text scrollbar-thin">
               
               {/* Concept Markdown Text Content */}
-              <div className="prose prose-invert prose-xs text-slate-300">
+              <div className="prose prose-invert prose-xs text-slate-350">
                 {lesson.content.split('\n\n').map((block, bIdx) => {
                   if (block.startsWith('### ')) {
                     return <h3 key={bIdx} className="text-base font-bold text-slate-200 mt-4 mb-2">{block.replace('### ', '')}</h3>;
@@ -418,8 +550,8 @@ export default function CoursesPage({ onExploreAlgo }) {
 
               {/* Interactive Quiz Component Card */}
               {lesson.quiz && (
-                <div className="border border-[#20212b] bg-[#1a1b24]/40 rounded-xl p-4.5 mt-4 flex flex-col gap-3">
-                  <div className="flex items-center gap-2 text-indigo-400 border-b border-slate-900 pb-2">
+                <div className="border border-[#383838] bg-[#1a1a1a]/40 rounded-xl p-4.5 mt-4 flex flex-col gap-3">
+                  <div className="flex items-center gap-2 text-[#ffa116] border-b border-slate-800 pb-2">
                     <HelpCircle className="w-4 h-4" />
                     <span className="font-sans font-bold text-xs">Concept Check Challenge</span>
                   </div>
@@ -431,13 +563,13 @@ export default function CoursesPage({ onExploreAlgo }) {
                   <div className="flex flex-col gap-2 mt-1.5">
                     {lesson.quiz.options.map((opt, oIdx) => {
                       const isSelected = userChoice === oIdx;
-                      let optionClasses = 'bg-[#161720] border-slate-800 text-slate-400 hover:border-slate-700';
+                      let optionClasses = 'bg-[#282828] border-slate-850 text-slate-400 hover:border-slate-700';
 
                       if (isSelected) {
                         if (feedbackStatus === 'correct') {
                           optionClasses = 'bg-emerald-500/15 border-emerald-500/50 text-emerald-400 font-bold';
                         } else if (feedbackStatus === 'wrong') {
-                          optionClasses = 'bg-rose-500/15 border-rose-500/50 text-rose-400 font-bold';
+                          optionClasses = 'bg-rose-500/15 border-rose-500/50 text-rose-450 font-bold';
                         }
                       }
 
@@ -451,7 +583,7 @@ export default function CoursesPage({ onExploreAlgo }) {
                           } ${optionClasses}`}
                         >
                           <span>{opt}</span>
-                          {isSelected && feedbackStatus === 'correct' && <Check className="w-3.5 h-3.5 text-emerald-450 stroke-[3]" />}
+                          {isSelected && feedbackStatus === 'correct' && <Check className="w-3.5 h-3.5 text-emerald-400 stroke-[3]" />}
                           {isSelected && feedbackStatus === 'wrong' && <X className="w-3.5 h-3.5 text-rose-400 stroke-[3]" />}
                         </button>
                       );
@@ -463,7 +595,7 @@ export default function CoursesPage({ onExploreAlgo }) {
                     <div className={`p-3 rounded-xl border text-xs leading-relaxed mt-1.5 flex flex-col gap-1 ${
                       feedbackStatus === 'correct'
                         ? 'bg-emerald-500/10 border-emerald-500/15 text-emerald-400/90'
-                        : 'bg-rose-500/10 border-rose-500/15 text-rose-450'
+                        : 'bg-rose-500/10 border-rose-500/15 text-rose-400'
                     }`}>
                       <span className="font-extrabold uppercase font-mono text-[9px] tracking-wider">
                         {feedbackStatus === 'correct' ? 'Correct Answer!' : 'Wrong Answer'}
@@ -486,9 +618,9 @@ export default function CoursesPage({ onExploreAlgo }) {
     <div className="w-full flex flex-col gap-6 text-left py-4 max-w-5xl mx-auto">
       
       {/* 1. Header Banner Catalog Details */}
-      <div className="p-5 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-indigo-500/5 to-transparent border border-indigo-500/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="p-5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-indigo-950/50 border border-indigo-800/40 text-indigo-400 rounded-xl">
+          <div className="p-2.5 bg-amber-950/20 border border-amber-800/40 text-[#ffa116] rounded-xl">
             <BookOpen className="w-5 h-5 animate-pulse" />
           </div>
           <div>
@@ -512,13 +644,15 @@ export default function CoursesPage({ onExploreAlgo }) {
       {/* 2. Course Cards Listing Grid */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2 border-b border-slate-900 pb-2 pl-1">
-          <Sparkles className="w-4 h-4 text-indigo-400" />
+          <Sparkles className="w-4 h-4 text-[#ffa116]" />
           <h2 className="text-base font-bold tracking-tight text-slate-200 m-0">Course Modules</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {COURSES_DATA.map((c) => {
             const progress = getCourseProgress(c);
+            const completed = progress === 100;
+            const isLocked = !user && c.id !== 'arrays-sorting' && c.id !== 'searching-algorithms';
             return (
               <div
                 key={c.id}
@@ -532,7 +666,11 @@ export default function CoursesPage({ onExploreAlgo }) {
                     </span>
                     <span className="text-[10px] font-mono font-bold text-slate-500">{c.duration}</span>
                   </div>
-                  <h3 className="text-sm font-bold text-slate-200 tracking-tight mt-1">{c.title}</h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <h3 className="text-sm font-bold text-slate-200 tracking-tight m-0">{c.title}</h3>
+                    {completed && <Award className="w-4 h-4 text-amber-400 shrink-0" />}
+                    {isLocked && <Lock className="w-3.5 h-3.5 text-slate-500 shrink-0" />}
+                  </div>
                   <p className="text-[11px] text-slate-400 leading-relaxed mt-0.5">{c.desc}</p>
                 </div>
 
@@ -546,16 +684,23 @@ export default function CoursesPage({ onExploreAlgo }) {
                   {/* Progress bar line */}
                   <div className="w-full h-1.5 bg-slate-900 border border-slate-800/40 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-indigo-400 rounded-full transition-all duration-300"
+                      className={`h-full rounded-full transition-all duration-300 ${completed ? 'bg-amber-400' : 'bg-[#ffa116]'}`}
                       style={{ width: `${progress}%` }}
                     />
                   </div>
 
                   <button
-                    onClick={() => setSelectedCourse(c.id)}
-                    className="w-full py-2.5 bg-indigo-500 hover:bg-indigo-400 text-slate-950 text-xs font-bold rounded-xl cursor-pointer active:scale-95 transition-all mt-2.5 border-none font-sans"
+                    onClick={() => {
+                      if (isLocked) {
+                        onOpenAuth();
+                      } else {
+                        setSelectedCourse(c.id);
+                      }
+                    }}
+                    className="w-full py-2.5 bg-[#ffa116] hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-xl cursor-pointer active:scale-95 transition-all mt-2.5 border-none font-sans flex items-center justify-center gap-1"
                   >
-                    Start Learning
+                    <span>{completed ? 'Review Course' : 'Start Learning'}</span>
+                    {isLocked && <Lock className="w-3 h-3 ml-0.5" />}
                   </button>
                 </div>
               </div>
