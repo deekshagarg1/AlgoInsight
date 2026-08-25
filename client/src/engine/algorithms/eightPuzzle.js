@@ -198,22 +198,83 @@ export function generateEightPuzzleSteps(originalArray) {
       }
     });
 
-    const isLastStep = pIdx === path.length - 1 && node.h === 0;
+    const isInitial = pIdx === 0;
+    const isGoal = pIdx === path.length - 1 && node.h === 0;
 
-    steps.push({
-      array: mappedArray,
-      type: isLastStep ? STEP_TYPES.SORTED : (pIdx === 0 ? STEP_TYPES.INITIAL : STEP_TYPES.COMPARE),
-      indices: [], // empty for grid
-      sortedIndices: sortedIndices,
-      highlightedLines: isLastStep ? [24, 25] : (pIdx === 0 ? [18, 19, 20, 21] : [22, 23, 24, 29, 30, 31, 32]),
-      i: node.board.indexOf(0), // empty index
-      j: pIdx > 0 ? path[pIdx - 1].board.indexOf(0) : -1, // previous empty index to show swap
-      minIdx: -1,
-      explanation: pIdx === 0
-        ? `Start Board State.${autoSortedExplanation} Initial Manhattan Distance h(n) = ${node.h}.`
-        : `Step ${pIdx}: ${node.moveDetails}. Manhattan Distance h(n) = ${node.h}, Depth g(n) = ${node.g}.`,
-      operationText: `f(n) = ${node.g} + ${node.h} = ${node.g + node.h}`
-    });
+    if (isInitial) {
+      // Step 0: Setup
+      steps.push({
+        array: mappedArray,
+        type: STEP_TYPES.INITIAL,
+        indices: [],
+        sortedIndices: sortedIndices,
+        highlightedLines: [19, 20, 22, 29],
+        i: node.board.indexOf(0),
+        j: -1,
+        minIdx: -1,
+        explanation: `Start State.${autoSortedExplanation} Initializing PriorityQueue and Visited set (lines 19, 20). Adding initial state to open set (line 29) with Manhattan Distance h(n) = ${node.h}.`,
+        operationText: `f(n) = ${node.g} + ${node.h} = ${node.g + node.h}`
+      });
+    } else {
+      // Intermediate step
+      // Frame 1: Poll current board and check goal status
+      steps.push({
+        array: mappedArray,
+        type: STEP_TYPES.COMPARE,
+        indices: [],
+        sortedIndices: sortedIndices,
+        highlightedLines: [31, 33, 36],
+        i: node.board.indexOf(0),
+        j: path[pIdx - 1].board.indexOf(0),
+        minIdx: -1,
+        explanation: `A* polls state with lowest f(n) from priority queue (line 33). Checking if goal state has been reached (line 36).`,
+        operationText: `f(n) = ${node.g} + ${node.h} = ${node.g + node.h}`
+      });
+
+      if (isGoal) {
+        // Frame 2 for Goal: Return Path
+        steps.push({
+          array: mappedArray,
+          type: STEP_TYPES.SORTED,
+          indices: [],
+          sortedIndices: sortedIndices,
+          highlightedLines: [36, 37],
+          i: node.board.indexOf(0),
+          j: path[pIdx - 1].board.indexOf(0),
+          minIdx: -1,
+          explanation: `Goal state found (current.h == 0)! Reconstructing shortest path steps and returning (line 37).`,
+          operationText: `f(n) = ${node.g} + ${node.h} = ${node.g + node.h}`
+        });
+      } else {
+        // Frame 2: Check visited list
+        steps.push({
+          array: mappedArray,
+          type: STEP_TYPES.COMPARE,
+          indices: [],
+          sortedIndices: sortedIndices,
+          highlightedLines: [40, 42, 45],
+          i: node.board.indexOf(0),
+          j: path[pIdx - 1].board.indexOf(0),
+          minIdx: -1,
+          explanation: `Converting board to string layout key (line 40). Checking visited set (line 42) and adding to prevent duplicate cycles (line 45).`,
+          operationText: `f(n) = ${node.g} + ${node.h} = ${node.g + node.h}`
+        });
+
+        // Frame 3: Expand Neighbors
+        steps.push({
+          array: mappedArray,
+          type: STEP_TYPES.COMPARE,
+          indices: [],
+          sortedIndices: sortedIndices,
+          highlightedLines: [47, 49, 50],
+          i: node.board.indexOf(0),
+          j: path[pIdx - 1].board.indexOf(0),
+          minIdx: -1,
+          explanation: `Looping through all valid adjacent neighbors of the empty sliding tile (line 47). Pushing unvisited states to priority queue (line 50).`,
+          operationText: `f(n) = ${node.g} + ${node.h} = ${node.g + node.h}`
+        });
+      }
+    }
   });
 
   return steps;
