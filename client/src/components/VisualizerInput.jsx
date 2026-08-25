@@ -16,7 +16,14 @@ import { ChevronUp, ChevronDown, Check, Edit2, AlertCircle } from 'lucide-react'
  * @param {Function} props.onGenerateArray - Callback to submit updated array
  * @param {boolean} props.disabled - Disable updates during active playback loop
  */
-export default function VisualizerInput({ array, onGenerateArray, disabled, selectedAlgoId }) {
+export default function VisualizerInput({
+  array,
+  onGenerateArray,
+  disabled,
+  selectedAlgoId,
+  target = 22,
+  onTargetChange
+}) {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [isEditingCustom, setIsEditingCustom] = React.useState(false);
   const [customText, setCustomText] = React.useState('');
@@ -173,6 +180,35 @@ export default function VisualizerInput({ array, onGenerateArray, disabled, sele
               <span className="text-[#8be9fd] font-bold">
                 [{array.join(', ')}]
               </span>
+            </div>
+          )}
+
+          {/* Target Element Input (Search Algorithms Only) */}
+          {(selectedAlgoId === 'linear-search' || selectedAlgoId === 'binary-search') && (
+            <div className="w-full bg-[#1c1d27]/40 border border-[#20212b]/50 rounded-xl p-3 flex items-center justify-between font-mono text-xs shadow-inner animate-in fade-in duration-200">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[#6272a4]">target =</span>
+                <span className="text-[#ffb86c] font-bold">
+                  {target}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-slate-500 uppercase tracking-widest font-sans font-bold">Change Target:</span>
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  disabled={disabled}
+                  value={target}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    if (val >= 1 && val <= 100) {
+                      onTargetChange(val);
+                    }
+                  }}
+                  className="w-16 px-2.5 py-1 rounded-lg border border-[#2c2d3a] bg-[#1a1b24] text-xs font-mono text-[#ffb86c] focus:outline-none focus:border-indigo-500/50 transition-all text-center"
+                />
+              </div>
             </div>
           )}
 

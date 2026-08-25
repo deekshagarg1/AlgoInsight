@@ -181,6 +181,11 @@ export default function BarVisualizer({
               <span>depth = </span>
               <span className="text-[#38bdf8] font-extrabold">{depth || 1}</span>
             </>
+          ) : algoId === 'linear-search' || algoId === 'binary-search' ? (
+            <>
+              <span>target = </span>
+              <span className="text-yellow-400 font-extrabold">{keyValue || 0}</span>
+            </>
           ) : (
             <>
               <span>pass = </span>
@@ -189,10 +194,21 @@ export default function BarVisualizer({
           )}
         </div>
         <div>
-          <span>swapped = </span>
-          <span className={`${swapped ? 'text-amber-400' : 'text-slate-500'} font-extrabold`}>
-            {swapped ? 'true' : 'false'}
-          </span>
+          {algoId === 'linear-search' || algoId === 'binary-search' ? (
+            <>
+              <span>found = </span>
+              <span className={`${swapped ? 'text-emerald-450' : 'text-slate-550'} font-extrabold`}>
+                {swapped ? 'true' : 'false'}
+              </span>
+            </>
+          ) : (
+            <>
+              <span>swapped = </span>
+              <span className={`${swapped ? 'text-amber-400' : 'text-slate-500'} font-extrabold`}>
+                {swapped ? 'true' : 'false'}
+              </span>
+            </>
+          )}
         </div>
       </div>
 
@@ -202,6 +218,12 @@ export default function BarVisualizer({
           {array.map((item, idx) => {
             const isActive = activeIndices.includes(idx);
             const isSorted = sortedIndices.includes(idx);
+
+            // Determine if the element is outside the active binary search bounds (dimmed)
+            let isDimmed = false;
+            if (algoId === 'binary-search' && i >= 0 && j >= 0) {
+              isDimmed = idx < i || idx > j;
+            }
 
             // Height formula (capped at 55% to ensure ample jump headroom)
             const heightPercentRaw = maxValue > 0 ? (item.value / maxValue) * 55 : 0;
@@ -233,16 +255,16 @@ export default function BarVisualizer({
                 };
               }
             } else {
-              // Bubble and Selection Sort
-              if (isActive) {
-                barClasses = 'border-yellow-400 bg-[#1c1a11]/45 text-yellow-400 border-[2.5px]';
-                glowStyle = { 
-                  boxShadow: '0 0 15px rgba(250, 204, 21, 0.5)'
-                };
-              } else if (isSorted) {
+              // Bubble, Selection Sort, and Search
+              if (isSorted) {
                 barClasses = 'border-[#55f0b5] bg-gradient-to-t from-[#047857] via-[#10b981] to-[#a7f3d0] text-slate-950 font-black';
                 glowStyle = { 
                   boxShadow: '0 0 15px rgba(16, 185, 129, 0.6)'
+                };
+              } else if (isActive) {
+                barClasses = 'border-yellow-400 bg-[#1c1a11]/45 text-yellow-400 border-[2.5px]';
+                glowStyle = { 
+                  boxShadow: '0 0 15px rgba(250, 204, 21, 0.5)'
                 };
               } else if (idx === minIdx) {
                 barClasses = 'border-[#bd93f9] bg-[#1d1b28]/45 text-[#bd93f9] border-[2.5px]';
@@ -282,7 +304,11 @@ export default function BarVisualizer({
                   y: { duration: 0.9, ease: "easeInOut" }
                 }}
                 className="flex-1 flex flex-col justify-end items-center origin-bottom max-w-[40px] z-10"
-                style={{ height: '100%' }}
+                style={{ 
+                  height: '100%',
+                  opacity: isDimmed ? 0.2 : 1,
+                  transition: 'opacity 0.3s ease'
+                }}
               >
                 {/* Fixed Value label above the bar */}
                 <span className={`text-[9px] sm:text-[10px] font-mono font-semibold mb-1 transition-colors duration-200 tracking-tighter ${
@@ -380,8 +406,8 @@ export default function BarVisualizer({
                 )}
               </div>
 
-              {/* Sliding Pointers */}
-              {anyActivePointer && (
+              {/* Sliding Pointers (Excluded for Binary Search) */}
+              {anyActivePointer && algoId !== 'binary-search' && (
                 <motion.div
                   key={showI ? 'p1-bubble' : 'p2-bubble'}
                   layoutId={showI ? 'pointer-p1' : 'pointer-p2'}
@@ -395,13 +421,15 @@ export default function BarVisualizer({
                   <div className={`w-[16px] h-[16px] rounded-full font-black text-[9px] font-mono flex items-center justify-center shadow-lg border ${bubbleColor}`}>
                     {algoId === 'selection-sort' || algoId === 'insertion-sort'
                       ? (showI ? 'i' : 'j')
+                      : algoId === 'linear-search' || algoId === 'binary-search'
+                      ? 'i'
                       : (showI ? 'j' : 'j+1')}
                   </div>
                 </motion.div>
               )}
 
-              {/* Sliding minIndex/key Pointer (Dracula Purple) */}
-              {isMinActive && (algoId === 'selection-sort' || algoId === 'insertion-sort') && (
+              {/* Sliding minIndex/key Pointer (Dracula Purple) (Excluded for Binary Search) */}
+              {isMinActive && (algoId === 'selection-sort' || algoId === 'insertion-sort') && algoId !== 'binary-search' && (
                 <motion.div
                   key="min-bubble"
                   layoutId="pointer-min"
@@ -416,6 +444,48 @@ export default function BarVisualizer({
                     {algoId === 'insertion-sort' ? 'key' : 'min'}
                   </div>
                 </motion.div>
+              )}
+
+              {/* Binary Search Pointers (Low/Left, High/Right, Mid) */}
+              {algoId === 'binary-search' && (
+                <>
+                  {i === idx && (
+                    <motion.div
+                      layoutId="pointer-low"
+                      className="absolute top-[21px] flex flex-col items-center z-20 translate-x-[-9px]"
+                      transition={{ type: 'spring', stiffness: 85, damping: 15 }}
+                    >
+                      <div className="w-[1.5px] h-3 bg-[#06b6d4]/85"></div>
+                      <div className="w-[16px] h-[16px] rounded-full bg-[#06b6d4] text-slate-950 font-black text-[9px] font-mono flex items-center justify-center border border-[#22d3ee]/40 shadow-lg shadow-cyan-500/20">
+                        L
+                      </div>
+                    </motion.div>
+                  )}
+                  {j === idx && (
+                    <motion.div
+                      layoutId="pointer-high"
+                      className="absolute top-[21px] flex flex-col items-center z-20 translate-x-[9px]"
+                      transition={{ type: 'spring', stiffness: 85, damping: 15 }}
+                    >
+                      <div className="w-[1.5px] h-3 bg-[#facc15]/85"></div>
+                      <div className="w-[16px] h-[16px] rounded-full bg-[#facc15] text-slate-950 font-black text-[9px] font-mono flex items-center justify-center border border-[#fde047]/40 shadow-lg shadow-yellow-500/20">
+                        R
+                      </div>
+                    </motion.div>
+                  )}
+                  {minIdx === idx && (
+                    <motion.div
+                      layoutId="pointer-mid"
+                      className="absolute top-[43px] flex flex-col items-center z-25"
+                      transition={{ type: 'spring', stiffness: 85, damping: 15 }}
+                    >
+                      <div className="w-[1.5px] h-[26px] bg-[#bd93f9]/85"></div>
+                      <div className="w-[16px] h-[16px] rounded-full bg-[#bd93f9] text-slate-950 font-black text-[9px] font-mono flex items-center justify-center border border-[#d6bbf9]/40 shadow-lg shadow-purple-500/20 animate-pulse">
+                        M
+                      </div>
+                    </motion.div>
+                  )}
+                </>
               )}
             </div>
           );

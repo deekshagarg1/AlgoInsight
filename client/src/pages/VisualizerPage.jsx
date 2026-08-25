@@ -4,6 +4,8 @@ import { generateSelectionSortSteps } from '../engine/algorithms/selectionSort';
 import { generateInsertionSortSteps } from '../engine/algorithms/insertionSort';
 import { generateMergeSortSteps } from '../engine/algorithms/mergeSort';
 import { generateCountingSortSteps } from '../engine/algorithms/countingSort';
+import { generateLinearSearchSteps } from '../engine/algorithms/linearSearch';
+import { generateBinarySearchSteps } from '../engine/algorithms/binarySearch';
 import BarVisualizer from '../components/BarVisualizer';
 import PlaybackControls from '../components/PlaybackControls';
 import VisualizerInput from '../components/VisualizerInput';
@@ -29,6 +31,7 @@ export default function VisualizerPage({ selectedAlgoId = 'bubble-sort' }) {
   const [speed, setSpeed] = React.useState(1600); // 0.5x (1600ms delay) default
   const [isFullscreen, setIsFullscreen] = React.useState(false);
   const [apiCodeData, setApiCodeData] = React.useState(null);
+  const [target, setTarget] = React.useState(22);
 
   const containerRef = React.useRef(null);
 
@@ -84,6 +87,16 @@ export default function VisualizerPage({ selectedAlgoId = 'bubble-sort' }) {
       name: 'Counting Sort',
       engine: generateCountingSortSteps,
       code: { java: [], cpp: [], python: [] }
+    },
+    'linear-search': {
+      name: 'Linear Search',
+      engine: generateLinearSearchSteps,
+      code: { java: [], cpp: [], python: [] }
+    },
+    'binary-search': {
+      name: 'Binary Search',
+      engine: generateBinarySearchSteps,
+      code: { java: [], cpp: [], python: [] }
     }
   };
 
@@ -93,22 +106,28 @@ export default function VisualizerPage({ selectedAlgoId = 'bubble-sort' }) {
   React.useEffect(() => {
     if (selectedAlgoId === 'counting-sort') {
       setArray([4, 2, 2, 8, 3, 3, 1]);
+    } else if (selectedAlgoId === 'linear-search') {
+      setArray([12, 34, 25, 11, 22, 90, 64]);
+      setTarget(22);
+    } else if (selectedAlgoId === 'binary-search') {
+      setArray([11, 12, 22, 25, 34, 64, 90]);
+      setTarget(25);
     } else {
       setArray([64, 34, 25, 12, 22, 11, 90]);
     }
   }, [selectedAlgoId]);
 
-  // Recalculate steps whenever array or selectedAlgoId changes
+  // Recalculate steps whenever array, target, or selectedAlgoId changes
   React.useEffect(() => {
     // Guard clause: skip generating steps if the array hasn't synced with Counting Sort constraints yet
     if (selectedAlgoId === 'counting-sort' && array.some(v => v > 9)) {
       return;
     }
-    const generatedSteps = currentAlgo.engine(array);
+    const generatedSteps = currentAlgo.engine(array, target);
     setSteps(generatedSteps);
     setCurrentStepIndex(0);
     setIsPlaying(false);
-  }, [array, selectedAlgoId]);
+  }, [array, target, selectedAlgoId]);
 
   // Playback timer loop
   React.useEffect(() => {
@@ -235,6 +254,8 @@ export default function VisualizerPage({ selectedAlgoId = 'bubble-sort' }) {
             onGenerateArray={handleGenerateArray}
             disabled={isPlaying}
             selectedAlgoId={selectedAlgoId}
+            target={target}
+            onTargetChange={setTarget}
           />
 
           {/* Bar Visual Canvas */}
@@ -244,13 +265,13 @@ export default function VisualizerPage({ selectedAlgoId = 'bubble-sort' }) {
             activeIndices={currentStep.indices}
             sortedIndices={currentStep.sortedIndices}
             pass={currentStep.pass}
-            swapped={currentStep.swapped}
+            swapped={currentStep.type === 'SORTED' || currentStep.swapped}
             operationText={currentStep.operationText}
             minIdx={currentStep.minIdx !== undefined ? currentStep.minIdx : -1}
             algoId={selectedAlgoId}
             i={currentStep.i !== undefined ? currentStep.i : -1}
             j={currentStep.j !== undefined ? currentStep.j : -1}
-            keyValue={currentStep.keyValue !== undefined ? currentStep.keyValue : -1}
+            keyValue={selectedAlgoId === 'linear-search' || selectedAlgoId === 'binary-search' ? target : (currentStep.keyValue !== undefined ? currentStep.keyValue : -1)}
             tempArray={currentStep.tempArray || []}
             depth={currentStep.depth || 0}
             leftRange={currentStep.leftRange || []}

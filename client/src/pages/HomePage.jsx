@@ -132,7 +132,7 @@ export default function HomePage({ onExplore }) {
         {/* Hero Title with split gradients */}
         <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight m-0 bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
           Inspect State Changes.
-          <span className="block mt-1 bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+          <span className="block mt-1 bg-gradient-to-r from-[#58a6ff] via-blue-500 to-[#79c0ff] bg-clip-text text-transparent">
             Visualize Algorithms Live.
           </span>
         </h1>
