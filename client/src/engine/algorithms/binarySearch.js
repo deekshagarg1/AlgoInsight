@@ -3,137 +3,153 @@ import { STEP_TYPES } from '../types';
 /**
  * Binary Search Step Generator
  * 
- * @param {number[]} originalArray - Raw number array
+ * @param {number[]} initialArray - Raw number array
  * @param {number} target - Element to search for
  * @returns {Array} Step states
  */
-export function generateBinarySearchSteps(originalArray, target) {
-  // 1. Ensure array is sorted (Binary Search requirement)
-  const isSorted = originalArray.every((val, idx) => idx === 0 || val >= originalArray[idx - 1]);
-  const workingArray = isSorted ? [...originalArray] : [...originalArray].sort((a, b) => a - b);
-  
-  const arr = workingArray.map((val, idx) => ({
-    id: `item-${val}-${idx}`,
-    value: val
-  }));
-  
-  const n = arr.length;
+export function generateBinarySearchSteps(initialArray = [], target = 22) {
   const steps = [];
+  // Ensure array is sorted for binary search
+  const isSorted = initialArray.every((val, idx) => idx === 0 || val >= initialArray[idx - 1]);
+  const sortedValues = isSorted ? [...initialArray] : [...initialArray].sort((a, b) => a - b);
+  const array = sortedValues.map((val, idx) => ({ id: `bs-${val}-${idx}`, value: val }));
 
   let low = 0;
-  let high = n - 1;
-  let mid = -1;
-  let foundIndex = -1;
+  let high = array.length - 1;
+  let comparisons = 0;
+  let found = false;
 
-  // Initial step setup
   steps.push({
-    array: [...arr],
-    type: STEP_TYPES.INITIAL,
+    array: JSON.parse(JSON.stringify(array)),
+    type: STEP_TYPES?.INITIAL || 'INITIAL',
     indices: [],
     sortedIndices: [],
-    highlightedLines: [1, 2],
-    i: low,
-    j: high,
-    minIdx: mid,
-    explanation: `Initializing Binary Search for target ${target}.${isSorted ? '' : ' Array was auto-sorted to satisfy Binary Search pre-conditions.'}`,
-    operationText: `target = ${target}`
+    target: target,
+    low: 0,
+    high: array.length - 1,
+    mid: -1,
+    i: 0,
+    j: array.length - 1,
+    minIdx: -1,
+    foundIndex: -1,
+    comparisons: 0,
+    highlightedLines: [1],
+    explanation: `Array sorted for Binary Search. Target = ${target}. Setting initial search range [low: 0, high: ${array.length - 1}].`,
+    operationText: `Target = ${target}`
   });
 
   while (low <= high) {
-    mid = Math.floor(low + (high - low) / 2);
+    const mid = Math.floor((low + high) / 2);
+    comparisons++;
+    const midVal = array[mid].value;
 
-    // Step 1: Calculate mid index
     steps.push({
-      array: [...arr],
-      type: STEP_TYPES.HIGHLIGHT,
+      array: JSON.parse(JSON.stringify(array)),
+      type: STEP_TYPES?.HIGHLIGHT || 'CALC_MID',
       indices: [mid],
       sortedIndices: [],
-      highlightedLines: [3, 4],
+      target: target,
+      low: low,
+      high: high,
+      mid: mid,
       i: low,
       j: high,
       minIdx: mid,
-      explanation: `Calculate middle index: mid = (${low} + ${high}) / 2 = ${mid}.`,
-      operationText: `mid = ${mid}`
+      foundIndex: -1,
+      comparisons: comparisons,
+      highlightedLines: [4],
+      explanation: `Calculated mid index = Math.floor((${low} + ${high}) / 2) = ${mid}. Inspecting arr[${mid}] (${midVal}).`,
+      operationText: `mid = ${mid}, arr[mid] = ${midVal}`
     });
 
-    // Step 2: Compare middle element
-    steps.push({
-      array: [...arr],
-      type: STEP_TYPES.COMPARE,
-      indices: [mid],
-      sortedIndices: [],
-      highlightedLines: [5],
-      i: low,
-      j: high,
-      minIdx: mid,
-      explanation: `Comparing middle element arr[${mid}] (${arr[mid].value}) with target (${target}).`,
-      operationText: `arr[${mid}] == ${target}?`
-    });
-
-    if (arr[mid].value === target) {
-      foundIndex = mid;
-      // Found match!
+    if (midVal === target) {
       steps.push({
-        array: [...arr],
-        type: STEP_TYPES.SORTED, // Highlights green
+        array: JSON.parse(JSON.stringify(array)),
+        type: STEP_TYPES?.SORTED || 'FOUND',
         indices: [mid],
         sortedIndices: [mid],
+        target: target,
+        low: low,
+        high: high,
+        mid: mid,
+        i: low,
+        j: high,
+        minIdx: mid,
+        foundIndex: mid,
+        comparisons: comparisons,
         highlightedLines: [6],
-        i: low,
-        j: high,
-        minIdx: mid,
-        explanation: `Match found! Target ${target} is at index ${mid}.`,
-        operationText: `Found at index ${mid}`
+        explanation: `Target value ${target} MATCHES arr[${mid}] (${midVal})! Found in ${comparisons} comparisons.`,
+        operationText: `FOUND at index ${mid}!`
       });
+      found = true;
       break;
-    }
-
-    if (arr[mid].value < target) {
-      // Search right half
+    } else if (midVal < target) {
+      steps.push({
+        array: JSON.parse(JSON.stringify(array)),
+        type: 'ADJUST_LOW',
+        indices: [mid],
+        sortedIndices: [],
+        target: target,
+        low: mid + 1,
+        high: high,
+        mid: mid,
+        i: mid + 1,
+        j: high,
+        minIdx: mid,
+        foundIndex: -1,
+        comparisons: comparisons,
+        highlightedLines: [8],
+        explanation: `arr[${mid}] (${midVal}) < ${target}. Target lies in right half. Adjusting low = mid + 1 (${mid + 1}).`,
+        operationText: `${midVal} < ${target} => low = ${mid + 1}`
+      });
       low = mid + 1;
-      steps.push({
-        array: [...arr],
-        type: STEP_TYPES.HIGHLIGHT,
-        indices: [mid],
-        sortedIndices: [],
-        highlightedLines: [8, 9],
-        i: low,
-        j: high,
-        minIdx: mid,
-        explanation: `Since arr[mid] (${arr[mid].value}) < target (${target}), search right half: low = ${mid} + 1 = ${low}.`,
-        operationText: `low = ${low}`
-      });
     } else {
-      // Search left half
-      high = mid - 1;
       steps.push({
-        array: [...arr],
-        type: STEP_TYPES.HIGHLIGHT,
+        array: JSON.parse(JSON.stringify(array)),
+        type: 'ADJUST_HIGH',
         indices: [mid],
         sortedIndices: [],
-        highlightedLines: [8, 10, 11],
+        target: target,
+        low: low,
+        high: mid - 1,
+        mid: mid,
         i: low,
-        j: high,
+        j: mid - 1,
         minIdx: mid,
-        explanation: `Since arr[mid] (${arr[mid].value}) > target (${target}), search left half: high = ${mid} - 1 = ${high}.`,
-        operationText: `high = ${high}`
+        foundIndex: -1,
+        comparisons: comparisons,
+        highlightedLines: [10],
+        explanation: `arr[${mid}] (${midVal}) > ${target}. Target lies in left half. Adjusting high = mid - 1 (${mid - 1}).`,
+        operationText: `${midVal} > ${target} => high = ${mid - 1}`
       });
+      high = mid - 1;
     }
   }
 
-  // Not found state
-  if (foundIndex === -1) {
+  if (!found) {
     steps.push({
-      array: [...arr],
-      type: STEP_TYPES.HIGHLIGHT,
+      array: JSON.parse(JSON.stringify(array)),
+      type: 'NOT_FOUND',
       indices: [],
       sortedIndices: [],
-      highlightedLines: [14],
+      target: target,
+      low: low,
+      high: high,
+      mid: -1,
       i: low,
       j: high,
       minIdx: -1,
-      explanation: `Search range exhausted (low > high). Target ${target} was not found. Returning -1.`,
-      operationText: `Not Found`
+      foundIndex: -1,
+      comparisons: comparisons,
+      highlightedLines: [12],
+      explanation: `Search range exhausted (low > high). Target ${target} NOT FOUND after ${comparisons} comparisons.`,
+      operationText: 'Not Found'
+    });
+  }
+
+  return steps;
+}
+
     });
   }
 

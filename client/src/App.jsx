@@ -121,7 +121,10 @@ function App() {
       {/* Navigation */}
       <Navbar 
         activeTab={activeTab} 
-        onChangeTab={setActiveTab} 
+        onChangeTab={(tab, algoId) => {
+          setActiveTab(tab);
+          if (algoId) setSelectedAlgoId(algoId);
+        }} 
         onOpenAuth={() => setIsAuthModalOpen(true)} 
       />
 

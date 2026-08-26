@@ -7,67 +7,77 @@ import { STEP_TYPES } from '../types';
  * @param {number} target - Element to search for
  * @returns {Array} Step states
  */
-export function generateLinearSearchSteps(originalArray, target) {
-  // Map input numbers to objects with unique stable IDs
+export function generateLinearSearchSteps(originalArray = [], target = 22) {
   const arr = originalArray.map((val, idx) => ({
-    id: `item-${val}-${idx}`,
+    id: `ls-${val}-${idx}`,
     value: val
   }));
   
   const n = arr.length;
   const steps = [];
 
-  // Initial step setup
   steps.push({
-    array: [...arr],
-    type: STEP_TYPES.INITIAL,
+    array: JSON.parse(JSON.stringify(arr)),
+    type: STEP_TYPES?.INITIAL || 'INITIAL',
     indices: [],
-    sortedIndices: [], // In search, we will store the found indices here
+    sortedIndices: [],
+    target: target,
+    currentIndex: -1,
+    foundIndex: -1,
+    comparisons: 0,
     highlightedLines: [1],
-    explanation: `Initializing Linear Search. We are looking for target element: ${target}.`,
-    operationText: `target = ${target}`
+    explanation: `Searching for target value ${target} in array of size ${n}.`,
+    operationText: `Target = ${target}`
   });
 
-  let foundIndex = -1;
+  let comparisons = 0;
+  let found = false;
 
   for (let i = 0; i < n; i++) {
-    // Step 1: Highlight loop index comparison
+    comparisons++;
+    const matches = arr[i].value === target;
+
     steps.push({
-      array: [...arr],
-      type: STEP_TYPES.COMPARE,
+      array: JSON.parse(JSON.stringify(arr)),
+      type: matches ? (STEP_TYPES?.SORTED || 'FOUND') : (STEP_TYPES?.COMPARE || 'COMPARE'),
       indices: [i],
-      sortedIndices: [],
-      highlightedLines: [4, 5],
-      explanation: `Checking index ${i}: Comparing arr[${i}] (${arr[i].value}) with target (${target}).`,
-      operationText: `arr[${i}] == ${target}?`
+      sortedIndices: matches ? [i] : [],
+      target: target,
+      currentIndex: i,
+      foundIndex: matches ? i : -1,
+      comparisons: comparisons,
+      highlightedLines: matches ? [6] : [4, 5],
+      explanation: matches 
+        ? `Target value ${target} FOUND at index ${i} after ${comparisons} comparisons!`
+        : `Checking index ${i}: arr[${i}] (${arr[i].value}) === ${target} ? False.`,
+      operationText: matches ? `FOUND: index ${i}` : `${arr[i].value} === ${target} ? False`
     });
 
-    if (arr[i].value === target) {
-      foundIndex = i;
-      // Step 2: Highlight match found index in green
-      steps.push({
-        array: [...arr],
-        type: STEP_TYPES.SORTED, // Highlights emerald green
-        indices: [i],
-        sortedIndices: [i],
-        highlightedLines: [6],
-        explanation: `Match found! Target ${target} is at index ${i}.`,
-        operationText: `Found: index ${i}`
-      });
+    if (matches) {
+      found = true;
       break;
     }
   }
 
-  // If not found, show final negative result step
-  if (foundIndex === -1) {
+  if (!found) {
     steps.push({
-      array: [...arr],
-      type: STEP_TYPES.HIGHLIGHT,
+      array: JSON.parse(JSON.stringify(arr)),
+      type: STEP_TYPES?.HIGHLIGHT || 'NOT_FOUND',
       indices: [],
       sortedIndices: [],
-      highlightedLines: [9],
-      explanation: `Completed scanning array. Target ${target} was not found. Returning -1.`,
-      operationText: `Not Found`
+      target: target,
+      currentIndex: -1,
+      foundIndex: -1,
+      comparisons: comparisons,
+      highlightedLines: [8],
+      explanation: `Target value ${target} NOT FOUND in array after ${comparisons} total comparisons.`,
+      operationText: 'Not Found'
+    });
+  }
+
+  return steps;
+}
+
     });
   }
 

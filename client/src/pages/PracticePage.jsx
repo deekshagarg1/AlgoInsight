@@ -203,6 +203,36 @@ const QUIZ_CATEGORIES = [
         explanation: "The elements are located at indexes 2, 3, and 4. The count is calculated as: Rear - Front + 1 = 4 - 2 + 1 = 3."
       }
     ]
+  },
+  {
+    id: 'graphs',
+    title: 'Graph & Tree Traversals',
+    desc: 'Verify BFS Queue ordering, DFS Stack exploration, and Binary Search Tree properties.',
+    iconColor: 'text-amber-400',
+    color: 'from-amber-500/10 via-amber-500/5 to-transparent border-amber-500/15',
+    questions: [
+      {
+        id: 'graph-1',
+        q: "Which data structure is used to implement Breadth-First Search (BFS) on a graph?",
+        options: ["Stack", "Queue", "Priority Queue", "Array"],
+        correctIdx: 1,
+        explanation: "Breadth-First Search (BFS) explores graph nodes layer by layer using a Queue (FIFO) buffer."
+      },
+      {
+        id: 'graph-2',
+        q: "What is the time complexity of Inorder Traversal on a Binary Search Tree with N nodes?",
+        options: ["O(1)", "O(log N)", "O(N)", "O(N²)"],
+        correctIdx: 2,
+        explanation: "Inorder traversal visits every node in the tree exactly once, taking O(N) linear time."
+      },
+      {
+        id: 'graph-3',
+        q: "Which graph algorithm calculates shortest paths from a single source node in weighted graphs with non-negative edge weights?",
+        options: ["Kruskal's Algorithm", "Dijkstra's Algorithm", "Prim's Algorithm", "Depth-First Search"],
+        correctIdx: 1,
+        explanation: "Dijkstra's algorithm uses greedy edge relaxation to find shortest paths from a single source node."
+      }
+    ]
   }
 ];
 
