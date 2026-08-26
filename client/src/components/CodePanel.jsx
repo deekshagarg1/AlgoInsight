@@ -167,6 +167,7 @@ export default function CodePanel({ highlightedLines = [], isLoopFalse = false, 
             <option value="java">☕ Java</option>
             <option value="cpp">⚙️ C++</option>
             <option value="python">🐍 Python</option>
+            <option value="javascript">⚡ JavaScript</option>
           </select>
         </div>
 
