@@ -149,9 +149,3 @@ export function generateBinarySearchSteps(initialArray = [], target = 22) {
 
   return steps;
 }
-
-    });
-  }
-
-  return steps;
-}

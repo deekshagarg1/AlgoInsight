@@ -77,9 +77,3 @@ export function generateLinearSearchSteps(originalArray = [], target = 22) {
 
   return steps;
 }
-
-    });
-  }
-
-  return steps;
-}

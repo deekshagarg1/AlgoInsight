@@ -329,7 +329,6 @@ export default function AlgorithmsPage({ onSelectAlgo, onOpenAuth }) {
           );
         })}
       </div>
-
-}
+    </div>
   );
 }
